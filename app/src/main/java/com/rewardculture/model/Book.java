@@ -49,6 +49,10 @@ public class Book implements Serializable {
         this.title = title;
     }
 
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
     public void addReview(Review review) {
         reviews.add(review);
     }
