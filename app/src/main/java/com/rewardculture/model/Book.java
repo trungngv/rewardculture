@@ -41,6 +41,14 @@ public class Book implements Serializable {
         this.reviews = reviews;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public void addReview(Review review) {
         reviews.add(review);
     }

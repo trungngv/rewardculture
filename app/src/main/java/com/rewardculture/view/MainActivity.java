@@ -1,21 +1,22 @@
-package com.rewardculture;
+package com.rewardculture.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.rewardculture.R;
 import com.rewardculture.model.database.Database;
 import com.rewardculture.model.database.LocalDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,52 +26,39 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		database = LocalDatabase.getInstance();
-
+		List<String> categories = database.getBookCategories();
 		setContentView(R.layout.activity_main);
-		ListView listView = findViewById(R.id.listview);
-		listView.setAdapter(new CategoryAdapter(this, database.getBookCategories()));
 
+		final ListView listView = findViewById(R.id.listview);
+		listView.setAdapter(new CategoriesAdapter(this, categories));
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v,
 									int position, long id) {
-				Toast.makeText(MainActivity.this, "" + position,
-						Toast.LENGTH_SHORT).show();
+				String selectedCategory = (String) listView.getSelectedItem();
+
+				Intent intent = new Intent(MainActivity.this, BooksActivity.class);
+				intent.putExtra(BooksActivity.ARG_BOOKS,
+						(ArrayList) database.getBooks(selectedCategory));
+				startActivity(intent);
 			}
 		});
 	}
 
-	public class CategoryAdapter extends BaseAdapter {
-		private Context mContext;
-		List<String> categories;
+	public class CategoriesAdapter extends ArrayAdapter<String> {
 
-		public CategoryAdapter(Context c, List<String> categories) {
-			mContext = c;
-			this.categories = categories;
-		}
-
-		public int getCount() {
-			return categories.size();
-		}
-
-		public Object getItem(int position) {
-			return null;
-		}
-
-		public long getItemId(int position) {
-			return 0;
+		public CategoriesAdapter(Context c, List<String> categories) {
+			super(c, R.layout.cardview_category, categories);
 		}
 
 		// create a new ImageView for each item referenced by the Adapter
 		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView textView;
 			if (convertView == null) {
-				textView = new TextView(mContext);
-				textView.setText(categories.get(position));
-			} else {
-				textView = (TextView) convertView;
+				convertView = getLayoutInflater().inflate(R.layout.cardview_category, parent, false);
 			}
-
-			return textView;
+			String category = getItem(position);
+			((TextView) convertView.findViewById(R.id.category_name)).setText(category);
+			return convertView;
 		}
+
 	}
 }
