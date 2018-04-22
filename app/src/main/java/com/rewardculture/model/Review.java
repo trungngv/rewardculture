@@ -19,6 +19,7 @@ public class Review implements Serializable {
 
     public Review(String text, String authorId, int upvotes, int downvotes) {
         this.text = text;
+        this.authorId = authorId;
         this.upvotes = upvotes;
         this.downvotes = downvotes;
     }

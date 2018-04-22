@@ -1,3 +1,5 @@
 <resources>
 	<string name="app_name">Reward Culture</string>
+    <string name="review">Review</string>
+    <string name="send">Send</string>
 </resources>
