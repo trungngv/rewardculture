@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v,
 									int position, long id) {
-				String selectedCategory = (String) listView.getSelectedItem();
+				String selectedCategory = (String) listView.getItemAtPosition(position);
 
 				Intent intent = new Intent(MainActivity.this, BooksActivity.class);
 				intent.putExtra(BooksActivity.ARG_BOOKS,
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 				convertView = getLayoutInflater().inflate(R.layout.cardview_category, parent, false);
 			}
 			String category = getItem(position);
-			((TextView) convertView.findViewById(R.id.category_name)).setText(category);
+			((TextView) convertView.findViewById(R.id.cv_category_name)).setText(category);
 			return convertView;
 		}
 
