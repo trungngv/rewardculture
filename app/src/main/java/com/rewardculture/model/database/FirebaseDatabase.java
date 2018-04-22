@@ -1,4 +1,4 @@
-package com.rewardculture.controller;
+package com.rewardculture.model.database;
 
 /**
  * Upload data to Firebase.
@@ -7,7 +7,7 @@ package com.rewardculture.controller;
  * TODO upload dictionary
  */
 
-public class FirebaseAdmin {
+public class FirebaseDatabase {
 
 //    private static final String PUSHED_DATA_FILE = "core/data/pushed_data";
 //
@@ -142,7 +142,7 @@ public class FirebaseAdmin {
 //    }
 //
 //    public static void checkPushedData() throws IOException, ClassNotFoundException {
-//        Object[] results = FirebaseAdmin.readPushedData("core/data/pushed_data");
+//        Object[] results = FirebaseDatabase.readPushedData("core/data/pushed_data");
 //        Map<String, String> collections = (Map<String, String>) results[0];
 //        System.out.println(collections);
 //        System.out.println();

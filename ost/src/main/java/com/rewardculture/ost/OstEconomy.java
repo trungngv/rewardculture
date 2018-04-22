@@ -4,12 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -20,7 +16,7 @@ import okhttp3.Response;
 /**
  * Helper class for talking to OSTalpha API.
  */
-public class OstApiHelper {
+public class OstEconomy implements TokenEconomy {
 
     private static final String API_KEY = "123093ca867a7c91586e";
     private static final String API_SECRET = "f4bbd1e0e8bcde04bc9d834d49a53e56b7dc84e007ec4c1bdcdeb79a681b7e6c";
@@ -43,25 +39,6 @@ public class OstApiHelper {
             = MediaType.parse("text/plain");
 
 
-    private static String bytesToHex(byte[] hash) {
-        StringBuffer hexString = new StringBuffer();
-        for (int i = 0; i < hash.length; i++) {
-            String hex = Integer.toHexString(0xff & hash[i]);
-            if(hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
-        return hexString.toString();
-    }
-
-    private String signToHex(String s) throws NoSuchAlgorithmException, UnsupportedEncodingException,
-            InvalidKeyException {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        String algorithm  = "RawBytes";
-        SecretKeySpec key = new SecretKeySpec(API_SECRET.getBytes("UTF-8"), algorithm);
-        mac.init(key);
-        return bytesToHex(mac.doFinal(s.getBytes("UTF-8")));
-    }
-
     public String createUser(String username) throws IOException, NoSuchAlgorithmException,
             JSONException, InvalidKeyException {
         String uname = username.replaceAll("%20", "+");
@@ -69,7 +46,7 @@ public class OstApiHelper {
         // users/create?api_key=&name=&request_timestamp=
         String query = String.format("%s?api_key=%s&name=%s&request_timestamp=%s",
                 ENDPOINT_CREATEUSER, API_KEY, uname, timestamp);
-        String signature = signToHex(query);
+        String signature = Crypto.signToHex(API_SECRET, query);
 
         JSONObject data = new JSONObject();
         data.put("api_key", API_KEY);
@@ -88,13 +65,13 @@ public class OstApiHelper {
         return response.body().string();
     }
 
-    public void executeTransaction(String fromUser, String toUser) {
-        System.out.println("transaction executed");
+    public String executeTransaction(String fromUser, String toUser) {
+        return "transaction executed";
     }
 
     public static void main(String args[]) throws JSONException, NoSuchAlgorithmException,
             IOException, InvalidKeyException {
-        OstApiHelper helper = new OstApiHelper();
+        OstEconomy helper = new OstEconomy();
         System.out.println(helper.createUser("trung"));
     }
 }

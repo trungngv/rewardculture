@@ -22,19 +22,22 @@ public class Book implements Serializable {
 
     private String id;
     private String title;
+    private String category;
     private List<Review> reviews;
     private String firebaseRefKey;
 
     public Book() {
     }
 
-    public Book(String title) {
+    public Book(String title, String category) {
         this.title = title;
+        this.category = category;
         reviews = new ArrayList<>();
     }
 
-    public Book(String title, List<Review> reviews) {
+    public Book(String title, String category, List<Review> reviews) {
         this.title = title;
+        this.category = category;
         this.reviews = reviews;
     }
 
@@ -45,8 +48,9 @@ public class Book implements Serializable {
     @Override
     public String toString() {
         return "Book{" +
-                "title='" + title + '\'' +
-                ", reviews=" + reviews +
+                "title=" + title + "\n" +
+                "category='" + category + "\n" +
+                ",reviews=" + reviews +
                 '}';
     }
 

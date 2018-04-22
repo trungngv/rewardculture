@@ -8,12 +8,12 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.junit.Assert.*;
 
-public class OstApiHelperTest {
-    OstApiHelper ost;
+public class OstEconomyTest {
+    OstEconomy ost;
 
     @org.junit.Before
     public void setUp() throws Exception {
-        ost = new OstApiHelper();
+        ost = new OstEconomy();
     }
 
     @org.junit.Test

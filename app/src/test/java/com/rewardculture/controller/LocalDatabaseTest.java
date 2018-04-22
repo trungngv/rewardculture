@@ -1,6 +1,7 @@
 package com.rewardculture.controller;
 
 import com.rewardculture.model.Book;
+import com.rewardculture.model.database.LocalDatabase;
 import com.rewardculture.model.User;
 
 import org.junit.Before;
@@ -18,17 +19,4 @@ public class LocalDatabaseTest {
         database = LocalDatabase.getInstance();
     }
 
-    @Test
-    public void getBooks() {
-        List<Book> books = database.getBooks();
-        System.out.println(books);
-        assertEquals(10, books.size());
-    }
-
-    @Test
-    public void getUsers() {
-        List<User> users = database.getUsers();
-        System.out.println(users);
-        assertEquals(10, users.size());
-    }
 }

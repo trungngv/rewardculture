@@ -10,13 +10,14 @@ public class Review implements Serializable {
 
     private String id;
     private String text;
+    private String authorId;
     private int upvotes;
     private int downvotes;
 
     public Review() {
     }
 
-    public Review(String text, int upvotes, int downvotes) {
+    public Review(String text, String authorId, int upvotes, int downvotes) {
         this.text = text;
         this.upvotes = upvotes;
         this.downvotes = downvotes;
