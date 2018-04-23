@@ -45,12 +45,12 @@ public class BookActivity extends AppCompatActivity {
         final ListView listView = findViewById(R.id.reviews);
         final ArrayAdapter adapter = new ReviewsAdapter(this, book.getReviews());
         // TODO what to here to make the list refresh
-        adapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-            }
-        });
+//        adapter.registerDataSetObserver(new DataSetObserver() {
+//            @Override
+//            public void onChanged() {
+//                super.onChanged();
+//            }
+//        });
         listView.setAdapter(adapter);
 
         // set up write review functionality
@@ -59,8 +59,7 @@ public class BookActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String txtReview = inputReview.getEditableText().toString();
-                Toast.makeText(BookActivity.this, txtReview, Toast.LENGTH_SHORT).show();
+                String txtReview = inputReview.getText().toString();
                 if (!txtReview.isEmpty()) {
                     // TODO use current user
                     String userId = database.getUsers().get(0).getUserId();
@@ -69,8 +68,7 @@ public class BookActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                     // TODO update database
                     // database.addReview(book, review);
-                    inputReview.clearComposingText();
-                    inputReview.clearFocus();
+                    inputReview.getText().clear();
                 }
             }
         });
