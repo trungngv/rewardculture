@@ -1,4 +1,4 @@
-package com.rewardculture.model.database;
+package com.rewardculture.database;
 
 import com.rewardculture.model.Book;
 import com.rewardculture.model.User;
@@ -7,8 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class DatabaseTest {
 

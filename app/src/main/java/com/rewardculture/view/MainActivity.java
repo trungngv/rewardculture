@@ -1,64 +1,69 @@
 package com.rewardculture.view;
 
-import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseListAdapter;
+import com.firebase.ui.database.FirebaseListOptions;
+import com.google.firebase.database.Query;
 import com.rewardculture.R;
-import com.rewardculture.model.database.Database;
-import com.rewardculture.model.database.LocalDatabase;
+import com.rewardculture.database.FirebaseDatabaseHelper;
+import com.rewardculture.misc.Constants;
+import com.rewardculture.model.CategorySnippet;
 
-import java.util.ArrayList;
-import java.util.List;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
-	Database database;
+    public static final String TAG = "MainActivity";
+    FirebaseDatabaseHelper dbHelper;
+
+    @BindView(R.id.listview)
+    ListView listView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		database = LocalDatabase.getInstance();
-		List<String> categories = database.getBookCategories();
 		setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-		final ListView listView = findViewById(R.id.listview);
-		listView.setAdapter(new CategoriesAdapter(this, categories));
+        dbHelper = FirebaseDatabaseHelper.getInstance();
+		Query query = dbHelper.getBookCategories();
+
+		listView.setAdapter(createListAdapter(query));
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v,
 									int position, long id) {
-				String selectedCategory = (String) listView.getItemAtPosition(position);
-
+				CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
 				Intent intent = new Intent(MainActivity.this, BooksActivity.class);
-				intent.putExtra(BooksActivity.ARG_BOOKS,
-						(ArrayList) database.getBooks(selectedCategory));
+				intent.putExtra(Constants.INTENT_CATEGORY, category.id);
 				startActivity(intent);
 			}
 		});
 	}
 
-	public class CategoriesAdapter extends ArrayAdapter<String> {
+	// TODO change to FirebaseRecyclerAdapter for efficiency later on
+	private ListAdapter createListAdapter(Query query) {
+	    // NOTE: setLifecycleOwner must be set for this to start listening to database events
+        FirebaseListOptions options = new FirebaseListOptions.Builder<CategorySnippet>()
+                .setQuery(query, CategorySnippet.class)
+                .setLifecycleOwner(this)
+                .setLayout(R.layout.cardview_category)
+                .build();
 
-		public CategoriesAdapter(Context c, List<String> categories) {
-			super(c, R.layout.cardview_category, categories);
-		}
+        FirebaseListAdapter adapter = new FirebaseListAdapter<CategorySnippet>(options) {
+            @Override
+            protected void populateView(View v, CategorySnippet model, int position) {
+                ((TextView) v.findViewById(R.id.cv_category_name)).setText(model.getName());
+            }
+        };
 
-		// create a new ImageView for each item referenced by the Adapter
-		public View getView(int position, View convertView, ViewGroup parent) {
-			if (convertView == null) {
-				convertView = getLayoutInflater().inflate(R.layout.cardview_category, parent, false);
-			}
-			String category = getItem(position);
-			((TextView) convertView.findViewById(R.id.cv_category_name)).setText(category);
-			return convertView;
-		}
-
-	}
+        return adapter;
+    }
 }

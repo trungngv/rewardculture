@@ -1,4 +1,4 @@
-package com.rewardculture.model.database;
+package com.rewardculture.database;
 
 import com.rewardculture.model.Book;
 import com.rewardculture.model.Review;
@@ -11,7 +11,7 @@ import java.util.Random;
 /**
  * Minimal local database for testing purpose.
  */
-public class LocalDatabase implements Database {
+public class LocalDatabase {
 
     static final int N_BOOK_CATEGORIES = 5;
     static final int N_BOOKS = 10;
@@ -24,7 +24,7 @@ public class LocalDatabase implements Database {
     private List<Review> reviews;
     private static final LocalDatabase instance = new LocalDatabase();
 
-    public static Database getInstance() {
+    public static LocalDatabase getInstance() {
         return instance;
     }
 
@@ -42,7 +42,7 @@ public class LocalDatabase implements Database {
         reviews = createReviews(N_REVIEWS);
         // assign all reviews to the first book
         for (Review review : reviews) {
-            books.get(0).addReview(review);
+            books.get(0).putReview("ignoreid", review);
         }
     }
 
@@ -92,17 +92,14 @@ public class LocalDatabase implements Database {
         return users;
     }
 
-    @Override
     public List<String> getBookCategories() {
         return bookCategories;
     }
 
-    @Override
     public List<Book> getBooks(String category) {
         return books;
     }
 
-    @Override
     public User getUser(String userId) {
         return null;
     }

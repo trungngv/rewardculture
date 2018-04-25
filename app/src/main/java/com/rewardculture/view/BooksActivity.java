@@ -1,63 +1,72 @@
 package com.rewardculture.view;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseListAdapter;
+import com.firebase.ui.database.FirebaseListOptions;
+import com.google.firebase.database.Query;
 import com.rewardculture.R;
-import com.rewardculture.model.Book;
+import com.rewardculture.database.FirebaseDatabaseHelper;
+import com.rewardculture.misc.Constants;
+import com.rewardculture.misc.Utils;
+import com.rewardculture.model.BookSnippet;
 
-import java.util.ArrayList;
-import java.util.List;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-public class BooksActivity extends ListActivity {
-	static final String ARG_BOOKS = "books";
+public class BooksActivity extends AppCompatActivity {
+    public static final String TAG = "BooksActivity";
 
-	@Override
+	FirebaseDatabaseHelper dbHelper;
+
+    @BindView(R.id.listview_books)
+    ListView listView;
+
+    @Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		List<Book> books = (List<Book>) getIntent().getSerializableExtra(ARG_BOOKS);
-		setListAdapter(new BooksAdapter(this, books));
+        setContentView(R.layout.activity_books);
+        ButterKnife.bind(this);
 
-		final ListView listView = getListView();
+        dbHelper = FirebaseDatabaseHelper.getInstance();
+        String category = getIntent().getStringExtra(Constants.INTENT_CATEGORY);
+        Query query = dbHelper.getBooks(category);
+		listView.setAdapter(createListAdapter(query));
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Book book = (Book) listView.getItemAtPosition(position);
-                Toast.makeText(BooksActivity.this, "selected book " + book.getTitle(), Toast.LENGTH_SHORT);
+                BookSnippet book = (BookSnippet) listView.getItemAtPosition(position);
+                Utils.showToastAndLog(BooksActivity.this, "selected book " + book.getTitle(), TAG);
 
                 Intent intent = new Intent(BooksActivity.this, BookActivity.class);
-                intent.putExtra(BookActivity.ARG_BOOK, book);
+                intent.putExtra(Constants.INTENT_BOOK, book.getBookId());
                 startActivity(intent);
             }
         });
 	}
 
-	public class BooksAdapter extends ArrayAdapter<Book> {
+    private ListAdapter createListAdapter(Query query) {
+        FirebaseListOptions options = new FirebaseListOptions.Builder<BookSnippet>()
+                .setQuery(query, BookSnippet.class)
+                .setLifecycleOwner(this)
+                .setLayout(R.layout.cardview_book)
+                .build();
 
-		public BooksAdapter(@NonNull Context context, @NonNull List<Book> objects) {
-			super(context, R.layout.cardview_book, objects);
-		}
+        FirebaseListAdapter adapter = new FirebaseListAdapter<BookSnippet>(options) {
+            @Override
+            protected void populateView(View v, BookSnippet model, int position) {
+                ((TextView) v.findViewById(R.id.cv_book_title)).setText(model.getTitle());
+            }
+        };
 
-		// create a new ImageView for each item referenced by the Adapter
-		public View getView(int position, View convertView, ViewGroup parent) {
-			if (convertView == null) {
-				convertView = getLayoutInflater().inflate(R.layout.cardview_book, parent, false);
-			}
-            Book book = getItem(position);
-			((TextView) convertView.findViewById(R.id.cv_book_title))
-					.setText(book.getTitle());
-			return convertView;
-		}
-	}
+        return adapter;
+    }
 }

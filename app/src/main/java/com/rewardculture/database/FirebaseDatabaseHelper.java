@@ -3,9 +3,9 @@ package com.rewardculture.database;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.rewardculture.model.Book;
 import com.rewardculture.model.User;
 
-import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -13,27 +13,29 @@ import java.util.List;
  *
  */
 
-public class FirebaseDatabaseImpl {
-    private static FirebaseDatabaseImpl instance = new FirebaseDatabaseImpl();
-    private static final String FB_REF_CATEGORY = "categories";
+public class FirebaseDatabaseHelper {
+    private static final String REF_CATEGORIES = "categories";
+    private static final String REF_CATEGORY = "category";
+    private static final String REF_BOOKS = "books";
+    private static final String REF_BOOK = "books";
 
-    DatabaseReference database;
+    private final DatabaseReference ref;
+    private static FirebaseDatabaseHelper instance = new FirebaseDatabaseHelper();
 
-    private FirebaseDatabaseImpl() {
-        database = FirebaseDatabase.getInstance().getReference();
+    private FirebaseDatabaseHelper() {
+         ref = FirebaseDatabase.getInstance().getReference();
     }
 
-    public static FirebaseDatabaseImpl getInstance() {
+    public static FirebaseDatabaseHelper getInstance() {
         return instance;
     }
 
     public Query getBookCategories() {
-        return database.child(FB_REF_CATEGORY);
+        return ref.child(REF_CATEGORIES);
     }
 
     public Query getBooks(String category) {
-        Query query = database.child(FB_REF_CATEGORY).child(category);
-        return query;
+        return ref.child(REF_CATEGORY).child(category).child(REF_BOOKS);
     }
 
     public User getUser(String userId) {
@@ -44,8 +46,7 @@ public class FirebaseDatabaseImpl {
         return null;
     }
 
-    public static void main(String args[]) throws FileNotFoundException {
-        FirebaseDatabaseImpl impl = FirebaseDatabaseImpl.getInstance();
-        System.out.println(impl.getBookCategories());
+    public DatabaseReference getBook(String bookId) {
+        return ref.child("books").child(bookId);
     }
 }
