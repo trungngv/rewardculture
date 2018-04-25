@@ -6,12 +6,12 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Book model.
- * <p>
- * Created by trung on 1/12/2016.
  */
 
 
@@ -20,11 +20,11 @@ public class Book implements Serializable {
     private static final String TITLE = "title";
     private static final String REVIEWS = "reviews";
 
-    private String id;
-    private String title;
-    private String category;
-    private List<Review> reviews;
-    private String firebaseRefKey;
+    public String id;
+    public String title;
+    public String author;
+    public String category;
+    public Map<String, Review> reviews;
 
     public Book() {
     }
@@ -32,10 +32,10 @@ public class Book implements Serializable {
     public Book(String title, String category) {
         this.title = title;
         this.category = category;
-        reviews = new ArrayList<>();
+        reviews = new HashMap();
     }
 
-    public Book(String title, String category, List<Review> reviews) {
+    public Book(String title, String category, Map reviews) {
         this.title = title;
         this.category = category;
         this.reviews = reviews;
@@ -49,12 +49,16 @@ public class Book implements Serializable {
         this.title = title;
     }
 
-    public List<Review> getReviews() {
+    public Map<String, Review> getReviews() {
         return reviews;
     }
 
-    public void addReview(Review review) {
-        reviews.add(review);
+    public void setReviews(Map<String, Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public void putReview(String key, Review review) {
+        reviews.put(key, review);
     }
 
     @Override
@@ -66,14 +70,6 @@ public class Book implements Serializable {
                 '}';
     }
 
-//    public void setFirebaseRefKey(String key) {
-//        firebaseRefKey = key;
-//    }
-//
-//    public String getFirebaseRefKey() {
-//        return firebaseRefKey;
-//    }
-//
 //    public JSONObject toJsonObject() throws JSONException {
 //        JSONObject object = new JSONObject();
 //        object.put(TITLE, title);

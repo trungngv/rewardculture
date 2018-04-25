@@ -24,7 +24,7 @@ public class LocalDatabase implements Database {
     private List<Review> reviews;
     private static final LocalDatabase instance = new LocalDatabase();
 
-    public static LocalDatabase getInstance() {
+    public static Database getInstance() {
         return instance;
     }
 
