@@ -11,7 +11,7 @@ public class LocalEconomy implements TokenEconomy {
     }
 
     @Override
-    public String executeTransaction(String fromUser, String toUser) {
+    public String executeTransaction(String fromUser, String toUser, String transactionKind) {
         return "{\"success\": true}";
     }
 }

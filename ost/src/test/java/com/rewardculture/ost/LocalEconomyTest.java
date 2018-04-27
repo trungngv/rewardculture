@@ -28,7 +28,7 @@ public class LocalEconomyTest {
 
     @Test
     public void executeTransaction() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
-        String response = economy.executeTransaction("fromuser", "touser");
+        String response = economy.executeTransaction("fromuser", "touser", "kind");
         JSONObject json = new JSONObject(response);
         assertTrue((Boolean) json.get("success"));
     }

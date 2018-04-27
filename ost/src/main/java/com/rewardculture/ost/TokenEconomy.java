@@ -14,6 +14,6 @@ public interface TokenEconomy {
     String createUser(String username) throws IOException, NoSuchAlgorithmException,
             JSONException, InvalidKeyException;
 
-    String executeTransaction(String fromUser, String toUser) throws IOException,
+    String executeTransaction(String fromUser, String toUser, String transactionKind) throws IOException,
             NoSuchAlgorithmException, JSONException, InvalidKeyException;
 }

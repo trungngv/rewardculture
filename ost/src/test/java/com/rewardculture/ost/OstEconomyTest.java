@@ -1,6 +1,7 @@
 package com.rewardculture.ost;
 
 import org.json.JSONObject;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -10,6 +11,8 @@ import static org.junit.Assert.*;
 
 public class OstEconomyTest {
     OstEconomy ost;
+    String[] params = {"id", "name"};
+    String[] values = {"1", "trung"};
 
     @org.junit.Before
     public void setUp() throws Exception {
@@ -25,5 +28,18 @@ public class OstEconomyTest {
 
     @org.junit.Test
     public void executeTransaction() {
+    }
+
+    @Test
+    public void buildQuery() {
+        String query = ost.buildQuery("endpoint", params, values);
+        assertEquals("endpoint?id=1&name=trung", query);
+    }
+
+    @Test
+    public void buildPostData() {
+        JSONObject data = ost.buildPostData(params, values);
+        assertEquals(values[0], data.get(params[0]));
+        assertEquals(values[1], data.get(params[1]));
     }
 }
