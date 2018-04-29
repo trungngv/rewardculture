@@ -1,12 +1,9 @@
 package com.rewardculture.view;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -25,12 +22,10 @@ import com.rewardculture.database.FirebaseDatabaseHelper;
 import com.rewardculture.misc.Constants;
 import com.rewardculture.misc.Utils;
 import com.rewardculture.model.Book;
-import com.rewardculture.model.BookSnippet;
 import com.rewardculture.model.Review;
-import com.rewardculture.database.Database;
 import com.rewardculture.database.LocalDatabase;
-
-import java.util.List;
+import com.rewardculture.ost.OstEconomy;
+import com.rewardculture.ost.TokenEconomy;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,8 +34,8 @@ public class BookActivity extends AppCompatActivity {
 
     private static final String TAG = "BookActivity";
 
-    LocalDatabase database = LocalDatabase.getInstance();
     FirebaseDatabaseHelper dbHelper;
+    TokenEconomy economy;
 
     @BindView(R.id.book_title)
     TextView bookTitle;
@@ -56,18 +51,17 @@ public class BookActivity extends AppCompatActivity {
 
     Book book;
     DatabaseReference bookRef;
-    DatabaseReference reviewsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book);
         ButterKnife.bind(this);
+        economy = new OstEconomy();
 
         String bookId = getIntent().getStringExtra(Constants.INTENT_BOOK);
         dbHelper = FirebaseDatabaseHelper.getInstance();
         bookRef = dbHelper.getBook(bookId);
-        reviewsRef = bookRef.child("reviews");
         bookRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -89,13 +83,20 @@ public class BookActivity extends AppCompatActivity {
                 String txtReview = inputReview.getText().toString();
                 if (!txtReview.isEmpty()) {
                     // TODO use logged in user
-                    String userId = database.getUsers().get(0).getUserId();
+                    String userId = "testUserId";
                     Review review = new Review(txtReview, userId, 0, 0);
-                    reviewsRef.push().setValue(review, new DatabaseReference.CompletionListener() {
+                    dbHelper.addReview(bookRef, review, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                             Utils.showToastAndLog(BookActivity.this,
                                     "review pushed" + databaseReference.getKey(), TAG);
+                            try {
+                                String response = economy.executeReviewTransaction(dbHelper.getTestUuid());
+                                Log.d(TAG, "review transaction response: " + response);
+                            } catch (Exception e) {
+                                Log.e(TAG, "review transaction failed");
+                                Log.e(TAG, e.getMessage());
+                            }
                         }
                     });
                     inputReview.getText().clear();
@@ -106,7 +107,7 @@ public class BookActivity extends AppCompatActivity {
 
     void updateUI() {
         bookTitle.setText(book.getTitle());
-        listView.setAdapter(createListAdapter(reviewsRef));
+        listView.setAdapter(createListAdapter(dbHelper.getReviews(bookRef)));
     }
 
     private ListAdapter createListAdapter(Query query) {
