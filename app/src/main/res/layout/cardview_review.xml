@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardview_review"
     android:layout_width="match_parent"
@@ -25,35 +26,48 @@
             android:id="@+id/layout_review"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_toRightOf="@+id/cv_profile_photo">
+            android:layout_toRightOf="@+id/cv_profile_photo"
+            android:orientation="vertical">
+
             <TextView
-                android:id="@+id/cv_reviewer_name"
+                android:id="@+id/cv_posted_by"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Author wrote"
+                android:text="Author"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/cv_review_text"
-                android:text="A nice review is a long review."
-                android:singleLine="false"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:text="A nice review is a long review." />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_alignLeft="@+id/layout_review"
-            android:layout_below="@+id/layout_review">
-            <ToggleButton
+            android:layout_below="@+id/layout_review"
+            android:orientation="horizontal">
+
+            <com.like.LikeButton
                 android:id="@+id/btn_like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textOn="Like"
-                android:textOff="Like"
-                android:textSize="8dp"/>
+                app:icon_size="15dp"
+                app:icon_type="thumb"
+                app:liked="false" />
+
+            <TextView
+                android:id="@+id/txt_likes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:clickable="false"
+                android:inputType="number"
+                android:text="0"
+                android:textAppearance="?android:textAppearanceSmall" />
         </LinearLayout>
 
     </RelativeLayout>
