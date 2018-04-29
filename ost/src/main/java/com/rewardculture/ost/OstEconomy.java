@@ -18,10 +18,11 @@ import okhttp3.Response;
 /**
  * Helper class for talking to OSTalpha API.
  */
-public class OstEconomy implements TokenEconomy {
+public class OstEconomy extends TokenEconomy {
 
     private static final String API_KEY = "123093ca867a7c91586e";
     private static final String API_SECRET = "f4bbd1e0e8bcde04bc9d834d49a53e56b7dc84e007ec4c1bdcdeb79a681b7e6c";
+    private static final String COMPANY_UUID = "6f7d0e3f-fa62-4a51-bd14-b125b6d5e261";
 
     private static final String CONTRACT_ADDRESS = "0xF2dB400Fe3A9410fA09eb76E13CD73E17cA9C9B4";
     // The address that initially hold minted tokens
@@ -30,7 +31,6 @@ public class OstEconomy implements TokenEconomy {
     private static final String BUDGET_HOLDER_ADDRESS = "0x38a1f09d30fcA61833c8502D9Be7503e4Df88b18";
     private static final String AIRDROP_CONTRACT_ADDRESS = "0x38A5B95875F912300CEa99Ad72F36F5a377DA15f";
     private static final String OST_E20_CONTRACT_ADDRESS = "0xca954C91BE676cBC4D5Ab5F624b37402E5f0d957";
-    private static final String COMPANY_UUID = "6f7d0e3f-fa62-4a51-bd14-b125b6d5e261";
 
     private static final String OST_URL = "https://playgroundapi.ost.com";
     private static final String ENDPOINT_CREATEUSER = "/users/create";
@@ -64,6 +64,12 @@ public class OstEconomy implements TokenEconomy {
         return data;
     }
 
+    @Override
+    public String getCompanyUuid() {
+        return COMPANY_UUID;
+    }
+
+    @Override
     public String createUser(String username) throws IOException, NoSuchAlgorithmException,
             JSONException, InvalidKeyException {
         String[] params = { "api_key", "name", "request_timestamp" };
@@ -90,7 +96,8 @@ public class OstEconomy implements TokenEconomy {
         return response.body().string();
     }
 
-    public String executeTransaction(String fromOstId, String toOstId, String transactionKind)
+    @Override
+    public String executeTransaction(String fromOstId, String toOstId, TransactionType transactionKind)
             throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         String[] params = {
                 "api_key", "from_uuid", "request_timestamp", "to_uuid", "transaction_kind"
@@ -100,7 +107,7 @@ public class OstEconomy implements TokenEconomy {
                 fromOstId,
                 String.valueOf(System.currentTimeMillis() / 1000),
                 toOstId,
-                transactionKind
+                transactionKind.toString()
         };
 
         // /transaction-types/execute?api_key=API_KEY&from_uuid=FROM_UUID&request_timestamp=EPOCH_TIME_SEC
@@ -112,7 +119,7 @@ public class OstEconomy implements TokenEconomy {
         data.put("signature", signature);
 
         Request request = new Request.Builder()
-                .url(OST_URL + ENDPOINT_CREATEUSER)
+                .url(OST_URL + ENDPOINT_TRANSACTION_EXECUTE)
                 .post(RequestBody.create(JSON, data.toString()))
                 .build();
 
@@ -120,11 +127,5 @@ public class OstEconomy implements TokenEconomy {
         Response response = client.newCall(request).execute();
 
         return response.body().string();
-    }
-
-    public static void main(String args[]) throws JSONException, NoSuchAlgorithmException,
-            IOException, InvalidKeyException {
-        OstEconomy helper = new OstEconomy();
-        System.out.println(helper.createUser("trung1110"));
     }
 }
