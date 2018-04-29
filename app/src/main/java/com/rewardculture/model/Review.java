@@ -1,6 +1,7 @@
 package com.rewardculture.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Class for Review.
@@ -10,18 +11,15 @@ public class Review implements Serializable {
 
     private String id;
     private String text;
-    private String authorId;
-    private int upvotes;
-    private int downvotes;
+    private PostedBySnippet postedBy;
+    private Map<String, Boolean> likes;
 
     public Review() {
     }
 
-    public Review(String text, String authorId, int upvotes, int downvotes) {
+    public Review(String text, PostedBySnippet postedBy) {
         this.text = text;
-        this.authorId = authorId;
-        this.upvotes = upvotes;
-        this.downvotes = downvotes;
+        this.postedBy = postedBy;
     }
 
     public String getId() {
@@ -32,6 +30,20 @@ public class Review implements Serializable {
         this.id = id;
     }
 
+    public void setPostedBy(PostedBySnippet postedBy) {
+        this.postedBy = postedBy;
+    }
+
+    public PostedBySnippet getPostedBy() {
+        return postedBy;
+    }
+
+    public String getPosterName() {
+        // Earlier data model does not contain this field so need to do a check here
+        // But if re-generating data then this should always be not null
+        return postedBy != null ? postedBy.getName() : null;
+    }
+
     public String getText() {
         return text;
     }
@@ -40,24 +52,30 @@ public class Review implements Serializable {
         this.text = text;
     }
 
-    public int getUpvotes() {
-        return upvotes;
+    public Map<String, Boolean> getLikes() {
+        return likes;
     }
 
-    public void setUpvotes(int upvotes) {
-        this.upvotes = upvotes;
+    public int getNumberOfLikes() {
+        return likes != null ? likes.size() : 0;
     }
 
-    public int getDownvotes() {
-        return downvotes;
-    }
-
-    public void setDownvotes(int downvotes) {
-        this.downvotes = downvotes;
+    public void setLikes(Map<String, Boolean> likes) {
+        this.likes = likes;
     }
 
     @Override
     public String toString() {
-        return String.format("{title: %s, upvotes: %d, downvotes: %d}", text, upvotes, downvotes);
+        return String.format("{text: %s, postedBy: %s, likes: %s}", text, postedBy, likes);
+    }
+
+    /**
+     * Return true if the user liked the review before.
+     *
+     * @param userId
+     * @return
+     */
+    public Boolean likedByUser(String userId) {
+        return likes != null ? likes.containsKey(userId) : false;
     }
 }
