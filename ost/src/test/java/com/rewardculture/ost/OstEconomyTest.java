@@ -19,7 +19,7 @@ public class OstEconomyTest {
     public void setUp() throws Exception {
         ost = new OstEconomy();
         testUuid = "6dc7e33b-e3db-4398-bd37-72e3de4656be";
-        testUuid = "f4ea13ca-3d15-4397-bd03-c017e74228ef";
+        // testUuid = "f4ea13ca-3d15-4397-bd03-c017e74228ef";
     }
 
     @org.junit.Test
@@ -29,10 +29,24 @@ public class OstEconomyTest {
         assertTrue("response: " + response, (Boolean) json.get("success"));
     }
 
-    @org.junit.Test
+    @Test
     public void executeTransaction() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         String response = ost.executeTransaction(ost.getCompanyUuid(), testUuid,
                 TokenEconomy.TransactionType.REVIEW);
+        JSONObject json = new JSONObject(response);
+        assertTrue("response: " + response, (Boolean) json.get("success"));
+    }
+
+    @Test
+    public void executeReviewTransaction() {
+        String response = ost.executeReviewTransaction(testUuid);
+        JSONObject json = new JSONObject(response);
+        assertTrue("response: " + response, (Boolean) json.get("success"));
+    }
+
+    @Test
+    public void executeLikeTransaction() {
+        String response = ost.executeLikeTransaction(testUuid);
         JSONObject json = new JSONObject(response);
         assertTrue("response: " + response, (Boolean) json.get("success"));
     }
