@@ -74,4 +74,25 @@ public class FirebaseDatabaseHelper {
     public DatabaseReference getBook(String bookId) {
         return ref.child("books").child(bookId);
     }
+
+    /**
+     * Perform database transaction for when user {@userId} likes a review.
+     *
+     * @param userId
+     * @param reviewRef
+     */
+    public void likeReview(String userId, DatabaseReference reviewRef) {
+        reviewRef.child("likes").child(userId).setValue(true);
+    }
+
+    /**
+     * Perform database transaction for when user {@userId} unlikes a review.
+     *
+     * @param userId
+     * @param reviewRef
+     */
+    public void unlikeReview(String userId, DatabaseReference reviewRef) {
+        reviewRef.child("likes").child(userId).setValue(null);
+    }
+
 }

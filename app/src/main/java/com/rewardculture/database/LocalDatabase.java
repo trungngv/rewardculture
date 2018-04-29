@@ -1,6 +1,7 @@
 package com.rewardculture.database;
 
 import com.rewardculture.model.Book;
+import com.rewardculture.model.PostedBySnippet;
 import com.rewardculture.model.Review;
 import com.rewardculture.model.User;
 
@@ -70,8 +71,8 @@ public class LocalDatabase {
         Random rand = new Random();
         List<Review> reviews = new ArrayList<>();
         for (int i = 0; i < numReviews; i++) {
-            Review review = new Review(String.format("Review %d", i), users.get(0).getUserId(),
-                    rand.nextInt(10), rand.nextInt(5));
+            Review review = new Review(String.format("Review %d", i),
+                    new PostedBySnippet(users.get(0).getUserId(), "Anonymous"));
             reviews.add(review);
         }
 
