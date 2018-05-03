@@ -18,6 +18,7 @@
 		</activity>
 		<activity android:name=".view.BooksActivity" />
 		<activity android:name=".view.BookActivity" />
-	</application>
+        <activity android:name=".auth.AuthUiActivity" />
+    </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.rewardculture.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,12 +10,18 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.util.ExtraConstants;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.Query;
 import com.rewardculture.R;
+import com.rewardculture.auth.AuthUiActivity;
 import com.rewardculture.database.FirebaseDatabaseHelper;
 import com.rewardculture.misc.Constants;
+import com.rewardculture.misc.Utils;
 import com.rewardculture.model.CategorySnippet;
 
 import butterknife.BindView;
@@ -22,35 +29,50 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
-    FirebaseDatabaseHelper dbHelper;
+
+    FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
+    private FirebaseAuth auth;
 
     @BindView(R.id.listview)
     ListView listView;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        dbHelper = FirebaseDatabaseHelper.getInstance();
-		Query query = dbHelper.getBookCategories();
+        auth = FirebaseAuth.getInstance();
+        // TODO remove after testing
+        // auth.signOut();
 
-		listView.setAdapter(createListAdapter(query));
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View v,
-									int position, long id) {
-				CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
-				Intent intent = new Intent(MainActivity.this, BooksActivity.class);
-				intent.putExtra(Constants.INTENT_CATEGORY, category.id);
-				startActivity(intent);
-			}
-		});
-	}
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            startActivity(AuthUiActivity.createIntent(this));
+            finish();
+            return;
+        }
+        //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
+        Utils.showToastAndLog(this, "signed in user: " + currentUser.getDisplayName(), TAG);
+        Query query = dbHelper.getBookCategories();
 
-	// TODO change to FirebaseRecyclerAdapter for efficiency later on
-	private ListAdapter createListAdapter(Query query) {
-	    // NOTE: setLifecycleOwner must be set for this to start listening to database events
+        listView.setAdapter(createListAdapter(query));
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
+                Intent intent = new Intent(MainActivity.this, BooksActivity.class);
+                intent.putExtra(Constants.INTENT_CATEGORY, category.id);
+                startActivity(intent);
+            }
+        });
+    }
+
+    // TODO change to FirebaseRecyclerAdapter for efficiency later on
+    private ListAdapter createListAdapter(Query query) {
+        // NOTE: setLifecycleOwner must be set for this to start listening to database events
         FirebaseListOptions options = new FirebaseListOptions.Builder<CategorySnippet>()
                 .setQuery(query, CategorySnippet.class)
                 .setLifecycleOwner(this)
@@ -65,5 +87,10 @@ public class MainActivity extends AppCompatActivity {
         };
 
         return adapter;
+    }
+
+    public static Intent createIntent(Context context, IdpResponse response) {
+        return new Intent().setClass(context, MainActivity.class)
+                .putExtra(ExtraConstants.IDP_RESPONSE, response);
     }
 }
