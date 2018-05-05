@@ -20,5 +20,6 @@
 		<activity android:name=".view.BookActivity" />
         <activity android:name=".auth.AuthUiActivity" />
     </application>
+	<uses-permission android:name="android.permission.INTERNET"/>
 
 </manifest>

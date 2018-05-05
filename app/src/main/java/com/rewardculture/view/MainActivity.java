@@ -21,15 +21,25 @@ import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.rewardculture.BuildConfig;
 import com.rewardculture.R;
-import com.rewardculture.auth.AuthUiActivity;
 import com.rewardculture.database.FirebaseDatabaseHelper;
 import com.rewardculture.misc.Constants;
 import com.rewardculture.misc.Utils;
 import com.rewardculture.model.CategorySnippet;
+import com.rewardculture.model.User;
+import com.rewardculture.ost.OstEconomy;
+import com.rewardculture.ost.TokenEconomy;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,23 +51,28 @@ public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 100;
 
     FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
-    private FirebaseAuth auth;
+    FirebaseAuth auth;
+    FirebaseUser user;
+    TokenEconomy economy;
 
     @BindView(R.id.listview)
     ListView listView;
 
+    public static Intent createIntent(Context context, IdpResponse response) {
+        return new Intent().setClass(context, MainActivity.class)
+                .putExtra(ExtraConstants.IDP_RESPONSE, response);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        economy = new OstEconomy();
         auth = FirebaseAuth.getInstance();
-
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null) {
+        user = auth.getCurrentUser();
+        if (user == null) {
             //startActivity(AuthUiActivity.createIntent(this));
             //finish();
             //return;
@@ -68,22 +83,62 @@ public class MainActivity extends AppCompatActivity {
                             .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                             .build(),
                     RC_SIGN_IN);
-            finish();
-            return;
+            //finish();
+            //return;
+        } else {
+            generateOstId(user);
+
+            //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
+            Utils.showToastAndLog(this, "signed in user: " + user.getDisplayName(), TAG);
+            Query query = dbHelper.getBookCategories();
+            listView.setAdapter(createListAdapter(query));
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        int position, long id) {
+                    CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
+                    Intent intent = new Intent(MainActivity.this, BooksActivity.class);
+                    intent.putExtra(Constants.INTENT_CATEGORY, category.id);
+                    startActivity(intent);
+                }
+            });
         }
+    }
 
-        //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
-        Utils.showToastAndLog(this, "signed in user: " + currentUser.getDisplayName(), TAG);
-        Query query = dbHelper.getBookCategories();
+    /**
+     * Check if user has an associated ost id. if not then generate id.
+     *
+     * @param user
+     */
+    private void generateOstId(final FirebaseUser user) {
+        final DatabaseReference userRef = dbHelper.getUser(user.getUid());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // u will be null if this user does not exist in Firebase
+                User u = (dataSnapshot.getValue(User.class));
+                // If user does not exist or does not have an associated ost id, create the user
+                if (u == null || u.getOstId() == null) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                JSONObject result = economy.parseUserResponse(
+                                        economy.createUser(user.getUid()));
+                                userRef.setValue(new User(user.getUid(), result.getString("uuid")));
+                                //userRef.setValue(new User(user.getUid(), "fake-uuid"));
+                                Log.d(TAG, "Ost id generated for user " + user.getDisplayName());
+                            } catch (IOException e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            } catch (JSONException e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            }
+                        }
+                    }).start();
+                }
+            }
 
-        listView.setAdapter(createListAdapter(query));
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-                CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
-                Intent intent = new Intent(MainActivity.this, BooksActivity.class);
-                intent.putExtra(Constants.INTENT_CATEGORY, category.id);
-                startActivity(intent);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }
@@ -105,11 +160,6 @@ public class MainActivity extends AppCompatActivity {
         };
 
         return adapter;
-    }
-
-    public static Intent createIntent(Context context, IdpResponse response) {
-        return new Intent().setClass(context, MainActivity.class)
-                .putExtra(ExtraConstants.IDP_RESPONSE, response);
     }
 
     @Override

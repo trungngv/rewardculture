@@ -82,8 +82,7 @@ public class LocalDatabase {
     private List<User> createUsers(int numUsers) {
         List<User> users = new ArrayList<>();
         for (int i = 0; i < numUsers; i++) {
-            users.add(new User(String.format("Test user %d", i), String.valueOf(i),
-                    String.valueOf("ost" + i)));
+            users.add(new User(String.valueOf(i), String.valueOf("ost" + i)));
         }
 
         return users;

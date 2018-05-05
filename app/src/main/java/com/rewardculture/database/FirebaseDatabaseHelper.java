@@ -23,6 +23,7 @@ public class FirebaseDatabaseHelper {
     private static final String REF_BOOKS = "books";
     private static final String REF_BOOK = "books";
     private static final String REF_REVIEWS = "reviews";
+    public static final String REF_USERS = "users";
 
     // this is user trung1110
     private String testUuid = "6dc7e33b-e3db-4398-bd37-72e3de4656be";
@@ -63,12 +64,18 @@ public class FirebaseDatabaseHelper {
         return testUuid;
     }
 
-    public User getUser(String userId) {
-        return null;
+    /**
+     * Returns the user with given userId (this is the Firebase UUID).
+     *
+     * @param userId
+     * @return
+     */
+    public DatabaseReference getUser(String userId) {
+        return ref.child(REF_USERS).child(userId);
     }
 
-    public List<User> getUsers() {
-        return null;
+    public void updateUser(User user) {
+        ref.child(REF_USERS).child(user.getUserId()).setValue(user);
     }
 
     public DatabaseReference getBook(String bookId) {
