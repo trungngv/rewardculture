@@ -4,10 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -70,12 +66,15 @@ public class OstEconomy extends TokenEconomy {
     }
 
     @Override
-    public String createUser(String username) throws IOException, NoSuchAlgorithmException,
-            JSONException, InvalidKeyException {
+    public String createUser(String username) throws IOException {
+        // TODO this is only a hack due to ost api's restriction on the username
+        if (username.length() >= 20) {
+            username = username.substring(0, 20);
+        }
         String[] params = { "api_key", "name", "request_timestamp" };
         String[] values = {
                 API_KEY,
-                username.replaceAll("%20", "+"),
+                username.replaceAll("%20", "+").replaceAll(" ", "+"),
                 String.valueOf(System.currentTimeMillis() / 1000),
         };
         // /users/create?api_key=&name=&request_timestamp=
@@ -98,7 +97,7 @@ public class OstEconomy extends TokenEconomy {
 
     @Override
     public String executeTransaction(String fromOstId, String toOstId, TransactionType transactionKind)
-            throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+            throws IOException {
         String[] params = {
                 "api_key", "from_uuid", "request_timestamp", "to_uuid", "transaction_kind"
         };

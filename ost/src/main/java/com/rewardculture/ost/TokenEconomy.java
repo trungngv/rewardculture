@@ -1,10 +1,9 @@
 package com.rewardculture.ost;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * Abstract class for the token economy.
@@ -31,12 +30,30 @@ public abstract class TokenEconomy {
 
     public abstract String getCompanyUuid();
 
-    public abstract String createUser(String username) throws IOException, NoSuchAlgorithmException,
-            JSONException, InvalidKeyException;
+    public abstract String createUser(String username) throws IOException;
 
     public abstract String executeTransaction(String fromUser, String toUser,
-                                              TransactionType transactionKind)
-            throws IOException, NoSuchAlgorithmException, JSONException, InvalidKeyException;
+                                              TransactionType transactionKind) throws IOException;
+
+    /**
+     * Parses the response from createuser API call.
+     *
+     * @param response
+     * @return JSONObject containing name and uuid.
+     */
+    public JSONObject parseUserResponse(String response) throws JSONException {
+        JSONObject obj = new JSONObject(response);
+        JSONObject meta = obj.getJSONObject("data").getJSONArray("economy_users").getJSONObject(0);
+        JSONObject result = new JSONObject();
+        Boolean success = obj.getBoolean("success");
+        result.put("success", success);
+        if (success) {
+            result.put("name", meta.getString("name"));
+            result.put("uuid", meta.getString("uuid"));
+        }
+
+        return result;
+    }
 
     /**
      * Executes a review transaction (i.e. which invokes a reward from company to the poster).
@@ -48,12 +65,6 @@ public abstract class TokenEconomy {
         String response = null;
         try {
             response = executeTransaction(getCompanyUuid(), posterUuid, TransactionType.REVIEW);
-        } catch (NoSuchAlgorithmException e) {
-
-        } catch (JSONException e) {
-
-        } catch (InvalidKeyException e) {
-
         } catch (IOException e) {
 
         } finally {
@@ -71,11 +82,7 @@ public abstract class TokenEconomy {
         String response = null;
         try {
             response = executeTransaction(getCompanyUuid(), posterUuid, TransactionType.LIKE);
-        } catch (NoSuchAlgorithmException e) {
-
         } catch (JSONException e) {
-
-        } catch (InvalidKeyException e) {
 
         } catch (IOException e) {
 

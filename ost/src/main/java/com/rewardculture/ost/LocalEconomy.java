@@ -1,6 +1,7 @@
 package com.rewardculture.ost;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The local economy for testing purpose. Can use mock for this as well.

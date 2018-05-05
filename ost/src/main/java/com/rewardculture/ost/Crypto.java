@@ -1,9 +1,5 @@
 package com.rewardculture.ost;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -23,12 +19,15 @@ public class Crypto {
         return hexString.toString();
     }
 
-    public static String signToHex(String secretKey, String s) throws NoSuchAlgorithmException,
-            UnsupportedEncodingException, InvalidKeyException {
-        Mac mac = Mac.getInstance(HMAC_SHA_256);
-        SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(UTF_8), ALGORITHM);
-        mac.init(key);
-        return bytesToHex(mac.doFinal(s.getBytes(UTF_8)));
+    public static String signToHex(String secretKey, String s) {
+        try {
+            Mac mac = Mac.getInstance(HMAC_SHA_256);
+            SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(UTF_8), ALGORITHM);
+            mac.init(key);
+            return bytesToHex(mac.doFinal(s.getBytes(UTF_8)));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

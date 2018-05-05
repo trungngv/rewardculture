@@ -5,29 +5,26 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class LocalEconomyTest {
 
     TokenEconomy economy;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         economy = new LocalEconomy();
     }
 
     @Test
-    public void createUser() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
-        String response = economy.createUser("newuser");
-        JSONObject json = new JSONObject(response);
-        assertTrue((Boolean) json.get("success"));
+    public void createUser() throws IOException {
+        JSONObject response = new JSONObject(economy.createUser("newuser"));
+        assertTrue((Boolean) response.get("success"));
     }
 
     @Test
-    public void executeTransaction() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void executeTransaction() throws IOException {
         String response = economy.executeTransaction("fromuser", "touser",
                 TokenEconomy.TransactionType.REVIEW);
         JSONObject json = new JSONObject(response);
