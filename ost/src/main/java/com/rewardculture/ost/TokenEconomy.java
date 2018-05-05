@@ -56,20 +56,14 @@ public abstract class TokenEconomy {
     }
 
     /**
-     * Executes a review transaction (i.e. which invokes a reward from company to the poster).
+     * Executes a transaction when an user writes a review, he/she gets some reward from
+     * the company.
      *
      * @param posterUuid uuid of the poster
      * @return
      */
-    public String executeReviewTransaction(String posterUuid) {
-        String response = null;
-        try {
-            response = executeTransaction(getCompanyUuid(), posterUuid, TransactionType.REVIEW);
-        } catch (IOException e) {
-
-        } finally {
-            return response;
-        }
+    public String executeReviewTransaction(String posterUuid) throws IOException {
+        return executeTransaction(getCompanyUuid(), posterUuid, TransactionType.REVIEW);
     }
 
     /**
@@ -78,17 +72,8 @@ public abstract class TokenEconomy {
      * @param posterUuid uuid of the poster
      * @return
      */
-    public String executeLikeTransaction(String posterUuid) {
-        String response = null;
-        try {
-            response = executeTransaction(getCompanyUuid(), posterUuid, TransactionType.LIKE);
-        } catch (JSONException e) {
-
-        } catch (IOException e) {
-
-        } finally {
-            return response;
-        }
+    public String executeLikeTransaction(String posterUuid) throws IOException {
+        return executeTransaction(getCompanyUuid(), posterUuid, TransactionType.LIKE);
     }
 
 }

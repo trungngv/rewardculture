@@ -4,10 +4,10 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class OstEconomyTest {
     OstEconomy ost;
@@ -38,14 +38,14 @@ public class OstEconomyTest {
     }
 
     @Test
-    public void executeReviewTransaction() {
+    public void executeReviewTransaction() throws IOException {
         String response = ost.executeReviewTransaction(testUuid);
         JSONObject json = new JSONObject(response);
         assertTrue("response: " + response, (Boolean) json.get("success"));
     }
 
     @Test
-    public void executeLikeTransaction() {
+    public void executeLikeTransaction() throws IOException {
         String response = ost.executeLikeTransaction(testUuid);
         JSONObject json = new JSONObject(response);
         assertTrue("response: " + response, (Boolean) json.get("success"));
