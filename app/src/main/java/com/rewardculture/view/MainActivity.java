@@ -46,14 +46,18 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+// TODO
+// 1. Add log out button (for easier testing)
+// 2. Add view balance (kinda like wallet)
+
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 100;
 
     FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
     FirebaseAuth auth;
-    FirebaseUser user;
     TokenEconomy economy;
+    User user;
 
     @BindView(R.id.listview)
     ListView listView;
@@ -71,8 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
         economy = new OstEconomy();
         auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
-        if (user == null) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
             //startActivity(AuthUiActivity.createIntent(this));
             //finish();
             //return;
@@ -86,10 +90,10 @@ public class MainActivity extends AppCompatActivity {
             //finish();
             //return;
         } else {
-            generateOstId(user);
+            generateOstId(firebaseUser);
 
             //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
-            Utils.showToastAndLog(this, "signed in user: " + user.getDisplayName(), TAG);
+            Utils.showToastAndLog(this, "signed in user: " + firebaseUser.getDisplayName(), TAG);
             Query query = dbHelper.getBookCategories();
             listView.setAdapter(createListAdapter(query));
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -98,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
                     Intent intent = new Intent(MainActivity.this, BooksActivity.class);
                     intent.putExtra(Constants.INTENT_CATEGORY, category.id);
+                    intent.putExtra(Constants.INTENT_USER, user);
                     startActivity(intent);
                 }
             });
@@ -107,25 +112,25 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Check if user has an associated ost id. if not then generate id.
      *
-     * @param user
+     * @param firebaseUser
      */
-    private void generateOstId(final FirebaseUser user) {
-        final DatabaseReference userRef = dbHelper.getUser(user.getUid());
+    private void generateOstId(final FirebaseUser firebaseUser) {
+        DatabaseReference userRef = dbHelper.getUser(firebaseUser.getUid());
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // u will be null if this user does not exist in Firebase
-                User u = (dataSnapshot.getValue(User.class));
+                // Will be null if this user does not exist in Firebase
+                user = (dataSnapshot.getValue(User.class));
                 // If user does not exist or does not have an associated ost id, create the user
-                if (u == null || u.getOstId() == null) {
+                if (user == null || user.getOstId() == null) {
                     new Thread(new Runnable() {
                         public void run() {
                             try {
                                 JSONObject result = economy.parseUserResponse(
-                                        economy.createUser(user.getUid()));
-                                userRef.setValue(new User(user.getUid(), result.getString("uuid")));
-                                //userRef.setValue(new User(user.getUid(), "fake-uuid"));
-                                Log.d(TAG, "Ost id generated for user " + user.getDisplayName());
+                                        economy.createUser(firebaseUser.getUid()));
+                                user = new User(firebaseUser.getUid(), result.getString("uuid"));
+                                dbHelper.updateUser(user);
+                                Log.d(TAG, "Ost id generated for " + firebaseUser.getDisplayName());
                             } catch (IOException e) {
                                 Log.e(TAG, e.getMessage(), e);
                             } catch (JSONException e) {
@@ -207,9 +212,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (auth != null) {
-            auth.signOut();
-            Log.d(TAG, "signing out user");
-        }
+//        if (auth != null) {
+//            auth.signOut();
+//            Log.d(TAG, "signing out user");
+//        }
     }
 }

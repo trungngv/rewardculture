@@ -25,9 +25,6 @@ public class FirebaseDatabaseHelper {
     private static final String REF_REVIEWS = "reviews";
     public static final String REF_USERS = "users";
 
-    // this is user trung1110
-    private String testUuid = "6dc7e33b-e3db-4398-bd37-72e3de4656be";
-
     private final DatabaseReference ref;
     private static FirebaseDatabaseHelper instance = new FirebaseDatabaseHelper();
 
@@ -54,14 +51,6 @@ public class FirebaseDatabaseHelper {
     public void addReview(DatabaseReference bookRef, Review review,
                           DatabaseReference.CompletionListener listener) {
         bookRef.child(REF_REVIEWS).push().setValue(review, listener);
-    }
-
-    /**
-     * Returns the ost id of the current logged in user (for transaction)
-     * @return
-     */
-    public String getTestUuid() {
-        return testUuid;
     }
 
     /**

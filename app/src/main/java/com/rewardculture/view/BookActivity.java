@@ -1,6 +1,6 @@
 package com.rewardculture.view;
 
-import android.database.DataSetObserver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,19 +29,29 @@ import com.rewardculture.misc.Utils;
 import com.rewardculture.model.Book;
 import com.rewardculture.model.PostedBySnippet;
 import com.rewardculture.model.Review;
+import com.rewardculture.model.User;
 import com.rewardculture.ost.OstEconomy;
 import com.rewardculture.ost.TokenEconomy;
+
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+// TODO record transactions in database
 public class BookActivity extends AppCompatActivity {
 
     private static final String TAG = "BookActivity";
 
     FirebaseDatabaseHelper dbHelper;
     TokenEconomy economy;
+    Book book;
+    DatabaseReference bookRef;
+    FirebaseListAdapter<Review> reviewsAdapter;
+    FirebaseUser firebaseUser;
+    User user;
+    int lastPosition = -1;
 
     @BindView(R.id.book_title)
     TextView bookTitle;
@@ -53,26 +65,24 @@ public class BookActivity extends AppCompatActivity {
     @BindView(R.id.btn_review)
     Button btn;
 
-    Book book;
-    DatabaseReference bookRef;
-    FirebaseListAdapter<Review> reviewsAdapter;
-    int lastPosition = -1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book);
         ButterKnife.bind(this);
-        economy = new OstEconomy();
+        Intent intent = getIntent();
+        String bookId = intent.getStringExtra(Constants.INTENT_BOOK);
+        user = (User) intent.getSerializableExtra(Constants.INTENT_USER);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        String bookId = getIntent().getStringExtra(Constants.INTENT_BOOK);
+        economy = new OstEconomy();
         dbHelper = FirebaseDatabaseHelper.getInstance();
         bookRef = dbHelper.getBook(bookId);
         bookRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, dataSnapshot.getValue().toString());
                 book = dataSnapshot.getValue(Book.class);
+                Log.d(TAG, dataSnapshot.getValue().toString());
                 updateUI();
             }
 
@@ -87,17 +97,26 @@ public class BookActivity extends AppCompatActivity {
     public void onSendReviewClick(View v) {
         String txtReview = inputReview.getText().toString();
         if (!txtReview.isEmpty()) {
-            // TODO use logged in user
-            String userId = "unknown";
-            Review review = new Review(txtReview, new PostedBySnippet(userId, "Trung Nguyen"));
+            Review review = new Review(txtReview, new PostedBySnippet(firebaseUser.getUid(),
+                    firebaseUser.getDisplayName()));
             // write review to database and execute ost transaction
             dbHelper.addReview(bookRef, review, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                     Utils.showToastAndLog(BookActivity.this,
                             "review pushed" + databaseReference.getKey(), TAG);
-                    String response = economy.executeReviewTransaction(dbHelper.getTestUuid());
-                    Log.d(TAG, "review transaction response: " + response);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                String response = economy.executeReviewTransaction(user.getOstId());
+                                Log.d(TAG, "review transaction response: " + response);
+                            } catch (IOException e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            }
+                        }
+                    }).start();
+
                 }
             });
             // reset state of input review
@@ -122,6 +141,36 @@ public class BookActivity extends AppCompatActivity {
         return adapter;
     }
 
+    void onLikeClick(int position, final Review model) {
+        dbHelper.likeReview(firebaseUser.getUid(), reviewsAdapter.getRef(position));
+        lastPosition = position;
+        // reward is given to the author of the review so need to retrieve his ost id from database
+        final DatabaseReference reference = dbHelper.getUser(model.getPostedBy().getId());
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final User reviewer = dataSnapshot.getValue(User.class);
+                if (reviewer == null) return;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String response = economy.executeLikeTransaction(reviewer.getOstId());
+                            Log.d(TAG, "like transaction response: " + response);
+                        } catch (IOException e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        }
+                    }
+                }).start();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     class ReviewsListAdapter extends FirebaseListAdapter<Review> {
 
         public ReviewsListAdapter(@NonNull FirebaseListOptions<Review> options) {
@@ -129,8 +178,7 @@ public class BookActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void populateView(View v, Review model, final int position) {
-            // TODO use logged in user
+        protected void populateView(View v, final Review model, final int position) {
             String posterName = model.getPosterName();
             if (posterName == null) {
                 posterName = "Anonymous user";
@@ -140,19 +188,16 @@ public class BookActivity extends AppCompatActivity {
             ((TextView) v.findViewById(R.id.txt_likes)).setText(
                     String.valueOf(model.getNumberOfLikes()));
             LikeButton btn = v.findViewById(R.id.btn_like);
-            btn.setLiked(model.likedByUser(dbHelper.getTestUuid()));
+            btn.setLiked(model.likedByUser(firebaseUser.getUid()));
             btn.setOnLikeListener(new OnLikeListener() {
                 @Override
                 public void liked(LikeButton likeButton) {
-                    String response = economy.executeLikeTransaction(dbHelper.getTestUuid());
-                    Log.d(TAG, "like transaction response" + response);
-                    dbHelper.likeReview(dbHelper.getTestUuid(), reviewsAdapter.getRef(position));
-                    lastPosition = position;
+                    onLikeClick(position, model);
                 }
 
                 @Override
                 public void unLiked(LikeButton likeButton) {
-                    dbHelper.unlikeReview(dbHelper.getTestUuid(), reviewsAdapter.getRef(position));
+                    dbHelper.unlikeReview(firebaseUser.getUid(), reviewsAdapter.getRef(position));
                     lastPosition = position;
                 }
             });

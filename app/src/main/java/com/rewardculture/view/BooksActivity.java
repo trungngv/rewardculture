@@ -18,6 +18,7 @@ import com.rewardculture.database.FirebaseDatabaseHelper;
 import com.rewardculture.misc.Constants;
 import com.rewardculture.misc.Utils;
 import com.rewardculture.model.BookSnippet;
+import com.rewardculture.model.User;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,6 +27,7 @@ public class BooksActivity extends AppCompatActivity {
     public static final String TAG = "BooksActivity";
 
 	FirebaseDatabaseHelper dbHelper;
+    User user;
 
     @BindView(R.id.listview_books)
     ListView listView;
@@ -35,9 +37,11 @@ public class BooksActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_books);
         ButterKnife.bind(this);
+        Intent intent = getIntent();
+        String category = intent.getStringExtra(Constants.INTENT_CATEGORY);
+        user = (User) intent.getSerializableExtra(Constants.INTENT_USER);
 
         dbHelper = FirebaseDatabaseHelper.getInstance();
-        String category = getIntent().getStringExtra(Constants.INTENT_CATEGORY);
         Query query = dbHelper.getBooks(category);
 		listView.setAdapter(createListAdapter(query));
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -48,6 +52,7 @@ public class BooksActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(BooksActivity.this, BookActivity.class);
                 intent.putExtra(Constants.INTENT_BOOK, book.getBookId());
+                intent.putExtra(Constants.INTENT_USER, user);
                 startActivity(intent);
             }
         });
