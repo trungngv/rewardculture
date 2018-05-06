@@ -10,6 +10,9 @@ import java.io.IOException;
  */
 public abstract class TokenEconomy {
 
+    public static final String SUCCESS = "success";
+    private static final String DATA = "data";
+
     public enum TransactionType {
         REVIEW("Review"),
         LIKE("Upvote");
@@ -43,16 +46,29 @@ public abstract class TokenEconomy {
      */
     public JSONObject parseUserResponse(String response) throws JSONException {
         JSONObject obj = new JSONObject(response);
-        JSONObject meta = obj.getJSONObject("data").getJSONArray("economy_users").getJSONObject(0);
+        JSONObject meta = obj.getJSONObject(DATA).getJSONArray("economy_users").getJSONObject(0);
         JSONObject result = new JSONObject();
-        Boolean success = obj.getBoolean("success");
-        result.put("success", success);
+        Boolean success = obj.getBoolean(SUCCESS);
+        result.put(SUCCESS, success);
         if (success) {
             result.put("name", meta.getString("name"));
             result.put("uuid", meta.getString("uuid"));
         }
 
         return result;
+    }
+
+    /**
+     * Parse transaction response.
+     *
+     * @param response
+     * @return a json object if transaction was successful, otherwise returns null.
+     * @throws JSONException
+     */
+    public JSONObject parseTransactionResponse(String response) throws JSONException {
+        JSONObject obj = new JSONObject(response);
+        Boolean success = obj.getBoolean(SUCCESS);
+        return success ? obj.getJSONObject(DATA) : null;
     }
 
     /**

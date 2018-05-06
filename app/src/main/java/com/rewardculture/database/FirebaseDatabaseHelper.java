@@ -7,6 +7,7 @@ import com.google.firebase.database.Query;
 import com.rewardculture.misc.Utils;
 import com.rewardculture.model.Book;
 import com.rewardculture.model.Review;
+import com.rewardculture.model.Transaction;
 import com.rewardculture.model.User;
 import com.rewardculture.view.BookActivity;
 
@@ -23,7 +24,8 @@ public class FirebaseDatabaseHelper {
     private static final String REF_BOOKS = "books";
     private static final String REF_BOOK = "books";
     private static final String REF_REVIEWS = "reviews";
-    public static final String REF_USERS = "users";
+    private static final String REF_USERS = "users";
+    private static final String REF_TRANSACTION = "transactions";
 
     private final DatabaseReference ref;
     private static FirebaseDatabaseHelper instance = new FirebaseDatabaseHelper();
@@ -91,4 +93,11 @@ public class FirebaseDatabaseHelper {
         reviewRef.child("likes").child(userId).setValue(null);
     }
 
+    /**
+     * Logs an economy transaction that was executed
+     * @param t
+     */
+    public void logTransaction(Transaction t) {
+        ref.child(REF_TRANSACTION).push().setValue(t);
+    }
 }

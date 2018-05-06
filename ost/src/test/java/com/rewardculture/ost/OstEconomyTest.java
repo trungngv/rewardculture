@@ -40,6 +40,7 @@ public class OstEconomyTest {
     @Test
     public void executeReviewTransaction() throws IOException {
         String response = ost.executeReviewTransaction(testUuid);
+        System.out.println(response);
         JSONObject json = new JSONObject(response);
         assertTrue("response: " + response, (Boolean) json.get("success"));
     }
@@ -47,6 +48,7 @@ public class OstEconomyTest {
     @Test
     public void executeLikeTransaction() throws IOException {
         String response = ost.executeLikeTransaction(testUuid);
+        System.out.println(response);
         JSONObject json = new JSONObject(response);
         assertTrue("response: " + response, (Boolean) json.get("success"));
     }
@@ -90,5 +92,23 @@ public class OstEconomyTest {
         String name = result.getString("name");
         assertEquals("test failed", "user1110", name);
         assertNotNull(result.getString("uuid"));
+    }
+
+    @Test
+    public void parseTransactionResponse() throws IOException {
+        String response = ost.executeTransaction(ost.getCompanyUuid(), testUuid,
+                TokenEconomy.TransactionType.REVIEW);
+        JSONObject result = ost.parseTransactionResponse(response);
+        assertNotNull("result is null", result);
+
+        assertNotNull("transaction_uuid not found in response",
+                result.getString("transaction_uuid"));
+        assertNotNull("from_uuid not found in respones",
+                result.getString("from_uuid"));
+        assertNotNull("to_uuid not found in response",
+                result.getString("to_uuid"));
+        assertNotNull("transaction_kind not found in response",
+                result.getString("transaction_kind"));
+
     }
 }

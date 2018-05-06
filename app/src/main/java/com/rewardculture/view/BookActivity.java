@@ -29,9 +29,13 @@ import com.rewardculture.misc.Utils;
 import com.rewardculture.model.Book;
 import com.rewardculture.model.PostedBySnippet;
 import com.rewardculture.model.Review;
+import com.rewardculture.model.Transaction;
 import com.rewardculture.model.User;
 import com.rewardculture.ost.OstEconomy;
 import com.rewardculture.ost.TokenEconomy;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -111,7 +115,10 @@ public class BookActivity extends AppCompatActivity {
                             try {
                                 String response = economy.executeReviewTransaction(user.getOstId());
                                 Log.d(TAG, "review transaction response: " + response);
+                                logTransaction(response);
                             } catch (IOException e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            } catch (JSONException e) {
                                 Log.e(TAG, e.getMessage(), e);
                             }
                         }
@@ -157,7 +164,10 @@ public class BookActivity extends AppCompatActivity {
                         try {
                             String response = economy.executeLikeTransaction(reviewer.getOstId());
                             Log.d(TAG, "like transaction response: " + response);
+                            logTransaction(response);
                         } catch (IOException e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        } catch (JSONException e) {
                             Log.e(TAG, e.getMessage(), e);
                         }
                     }
@@ -169,6 +179,13 @@ public class BookActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    void logTransaction(String transactionResponse) throws JSONException {
+        Transaction t = Transaction.fromJsonObject(
+                economy.parseTransactionResponse(transactionResponse));
+        t.setTransactionTime(System.currentTimeMillis());
+        dbHelper.logTransaction(t);
     }
 
     class ReviewsListAdapter extends FirebaseListAdapter<Review> {
