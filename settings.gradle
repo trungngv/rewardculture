@@ -1,1 +1,1 @@
-include ':app', ':ost'
+include ':app', ':ost', ':data'
