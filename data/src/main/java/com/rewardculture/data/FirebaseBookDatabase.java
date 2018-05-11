@@ -3,6 +3,7 @@ package com.rewardculture.data;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class FirebaseBookDatabase {
      *
      * @return
      */
-    JSONObject getCategoriesObject() {
+    JSONObject buildCategoriesObject() {
         JSONObject json = new JSONObject();
         for (String category : CATEGORIES) {
             json.put(category.toLowerCase(), new Category(category.toLowerCase(), category));
@@ -53,11 +54,10 @@ public class FirebaseBookDatabase {
      *
      * @return
      */
-    JSONObject booksToJsonObject(List<Book> books) throws IOException {
+    JSONObject buildBooksObject(List<Book> books) {
         JSONObject json = new JSONObject();
         for (Book book : books) {
-            // use hashcode as the book id
-            json.put(String.valueOf(book.hashCode()), book);
+            json.put(book.getId(), book);
         }
 
         return json;
@@ -66,10 +66,29 @@ public class FirebaseBookDatabase {
     /**
      * Build the /category object from books
      *
+     * /category/cat_id/books/{bookid:{bookId,title,author}}
+     *
      * @return
      */
-    JSONObject buildCategoryObject() {
-        return null;
+    JSONObject buildCategoryObject(List<Book> books) {
+        JSONObject json = new JSONObject();
+        String categoryKey;
+        for (Book book : books) {
+            // put this category in map if it's not there yet
+            categoryKey = book.getString("category");
+            JSONObject categoryValue;
+            if (!json.has(categoryKey)) {
+                categoryValue = new JSONObject();
+                categoryValue.put("books", new JSONObject());
+                json.put(categoryKey, categoryValue);
+            } else {
+                categoryValue = json.getJSONObject(categoryKey);
+            }
+            categoryValue.getJSONObject("books").put(book.getId(), book.getSnippet());
+
+        }
+
+        return json;
     }
 
     JSONObject buildComplteObject() throws IOException {
@@ -82,25 +101,12 @@ public class FirebaseBookDatabase {
             books.addAll(thisCategory);
         }
         System.out.printf("\nTotal #books: %d", books.size());
-        JSONObject bookJson = booksToJsonObject(books);
-        System.out.println(bookJson);
 
         JSONObject json = new JSONObject();
-        json.put("books", bookJson);
-        json.put("categories", getCategoriesObject());
+        json.put("categories", buildCategoriesObject());
+        json.put("books", buildBooksObject(books));
+        json.put("category", buildCategoryObject(books));
 
-        // /category/cat_id/books/{randomid:{bookId,title}}
-//        JSONObject category = new JSONObject();
-//
-//        // for each category
-//        JSONObject categoryDetail = new JSONObject();
-//        // books is a map
-//        categoryDetail.put("books", new HashMap<>());
-//        category.put("biography", categoryDetail);
-//
-//        json.put("category", category);
-
-        //System.out.println(json.toString());
         return json;
     }
 
@@ -109,6 +115,23 @@ public class FirebaseBookDatabase {
             put("title", title);
             put("author", author);
             put("category", category);
+        }
+
+        String getId() {
+            return String.valueOf(hashCode());
+        }
+
+        /**
+         * A quick snippet of the book which is used to link back to the book.
+         * @return
+         */
+        JSONObject getSnippet() {
+            JSONObject json = new JSONObject();
+            json.put("bookId", getId());
+            json.put("title", getString("title"));
+            json.put("author", getString("author"));
+
+            return json;
         }
     }
 
@@ -121,6 +144,9 @@ public class FirebaseBookDatabase {
 
     public static void main(String[] args) throws IOException {
         FirebaseBookDatabase db = new FirebaseBookDatabase();
-        System.out.println(db.buildComplteObject());
+        JSONObject json = db.buildComplteObject();
+        PrintWriter writer = new PrintWriter("books.json");
+        writer.println(json.toString());
+        writer.close();
     }
 }
