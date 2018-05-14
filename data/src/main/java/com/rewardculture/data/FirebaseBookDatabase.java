@@ -111,11 +111,12 @@ public class FirebaseBookDatabase {
     }
 
     static class Book extends JSONObject {
-        Book(String title, String author, String category, int year) {
+        Book(String title, String author, String category, int year, String coverUrl) {
             put("title", title);
             put("author", author);
             put("category", category);
             put("year", year);
+            put("coverUrl", coverUrl);
         }
 
         String getId() {
@@ -132,6 +133,7 @@ public class FirebaseBookDatabase {
             json.put("bookId", getId());
             json.put("title", getString("title"));
             json.put("author", getString("author"));
+            json.put("coverUrl", getString("coverUrl"));
 
             return json;
         }

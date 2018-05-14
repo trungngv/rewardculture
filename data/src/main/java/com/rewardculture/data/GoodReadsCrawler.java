@@ -26,7 +26,8 @@ public class GoodReadsCrawler {
                 element.select(".bookTitle").first().text(),
                 element.select(".authorName").first().text(),
                 category,
-                getYear(element.select(".greyText.smallText").first().text()));
+                getYear(element.select(".greyText.smallText").first().text()),
+                element.select(".leftAlignedImage").first().child(0).attr("src"));
     }
 
     /**
