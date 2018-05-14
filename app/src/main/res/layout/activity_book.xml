@@ -1,21 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="5dp">
 
-    <TextView
-        android:id="@+id/book_title"
+    <LinearLayout
+        android:id="@+id/book_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="Placeholder Titlte"
-        android:textSize="30sp"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/book_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Placeholder Titlte"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/book_author_year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="by Trung Nguyen (published 2018)" />
+
+    </LinearLayout>
 
 
     <ListView
@@ -28,9 +41,9 @@
         android:layout_marginStart="4dp"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/book_title"
         app:layout_constraintBottom_toTopOf="@+id/txt_review"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/book_summary"
         app:layout_constraintVertical_bias="1.0" />
 
     <EditText

@@ -60,6 +60,9 @@ public class BookActivity extends AppCompatActivity {
     @BindView(R.id.book_title)
     TextView bookTitle;
 
+    @BindView(R.id.book_author_year)
+    TextView bookAuthorYear;
+
     @BindView(R.id.reviews)
     ListView listView;
 
@@ -133,6 +136,8 @@ public class BookActivity extends AppCompatActivity {
 
     void updateUI() {
         bookTitle.setText(book.getTitle());
+        bookAuthorYear.setText(String.format("by %s -- published %d",
+                book.getAuthor(), book.getYear()));
         reviewsAdapter = createListAdapter(dbHelper.getReviews(bookRef));
         listView.setAdapter(reviewsAdapter);
     }
@@ -151,6 +156,10 @@ public class BookActivity extends AppCompatActivity {
     void onLikeClick(int position, final Review model) {
         dbHelper.likeReview(firebaseUser.getUid(), reviewsAdapter.getRef(position));
         lastPosition = position;
+
+        // posts by anonymous users
+        if (model.getPostedBy() == null) return;
+
         // reward is given to the author of the review so need to retrieve his ost id from database
         final DatabaseReference reference = dbHelper.getUser(model.getPostedBy().getId());
         reference.addListenerForSingleValueEvent(new ValueEventListener() {

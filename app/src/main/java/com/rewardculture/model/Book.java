@@ -1,13 +1,7 @@
 package com.rewardculture.model;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,13 +11,11 @@ import java.util.Map;
 
 public class Book implements Serializable {
 
-    private static final String TITLE = "title";
-    private static final String REVIEWS = "reviews";
-
     public String id;
     public String title;
     public String author;
     public String category;
+    public int year;
     public Map<String, Review> reviews;
 
     public Book() {
@@ -61,6 +53,22 @@ public class Book implements Serializable {
         reviews.put(key, review);
     }
 
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
@@ -69,22 +77,4 @@ public class Book implements Serializable {
                 ",reviews=" + reviews +
                 '}';
     }
-
-//    public JSONObject toJsonObject() throws JSONException {
-//        JSONObject object = new JSONObject();
-//        object.put(TITLE, title);
-//        object.put(REVIEWS, reviews);
-//        return object;
-//    }
-//
-//    public static Book fromJsonObject(JSONObject o) throws JSONException {
-//        JSONArray reviewsJson = (JSONArray) o.get(REVIEWS);
-//        List<Review> reviews = new ArrayList<>();
-//        for (Object obj : reviewsJson.toList()) {
-//            reviews.add(Review.fromObject(obj));
-//        }
-//
-//        return new Book(o.getString(TITLE),
-//                reviews);
-//    }
 }

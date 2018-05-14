@@ -1,6 +1,5 @@
 package com.rewardculture.view;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +22,7 @@ import com.rewardculture.model.User;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+// TODO replace place holder with actual author
 public class BooksActivity extends AppCompatActivity {
     public static final String TAG = "BooksActivity";
 
@@ -69,6 +69,7 @@ public class BooksActivity extends AppCompatActivity {
             @Override
             protected void populateView(View v, BookSnippet model, int position) {
                 ((TextView) v.findViewById(R.id.cv_book_title)).setText(model.getTitle());
+                ((TextView) v.findViewById(R.id.cv_author)).setText(model.getAuthor());
             }
         };
 
