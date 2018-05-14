@@ -17,11 +17,16 @@ public class GoodReadsCrawler {
 
     String url = "https://www.goodreads.com/shelf/show/";
 
+    int getYear(String text) {
+        return Integer.parseInt(text.split("published")[1].trim());
+    }
+
     FirebaseBookDatabase.Book getBook(Element element, String category) {
         return new FirebaseBookDatabase.Book(
                 element.select(".bookTitle").first().text(),
                 element.select(".authorName").first().text(),
-                category);
+                category,
+                getYear(element.select(".greyText.smallText").first().text()));
     }
 
     /**
@@ -44,8 +49,8 @@ public class GoodReadsCrawler {
                 if (book != null) {
                     result.add(book);
                 }
-            } catch (NullPointerException e) {
-
+            } catch (Exception e) {
+                // Ignore books where crawling rule fails
             }
         }
 

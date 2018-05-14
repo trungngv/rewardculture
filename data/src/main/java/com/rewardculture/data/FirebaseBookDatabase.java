@@ -65,7 +65,7 @@ public class FirebaseBookDatabase {
 
     /**
      * Build the /category object from books
-     *
+     * <p>
      * /category/cat_id/books/{bookid:{bookId,title,author}}
      *
      * @return
@@ -111,10 +111,11 @@ public class FirebaseBookDatabase {
     }
 
     static class Book extends JSONObject {
-        Book(String title, String author, String category) {
+        Book(String title, String author, String category, int year) {
             put("title", title);
             put("author", author);
             put("category", category);
+            put("year", year);
         }
 
         String getId() {
@@ -123,6 +124,7 @@ public class FirebaseBookDatabase {
 
         /**
          * A quick snippet of the book which is used to link back to the book.
+         *
          * @return
          */
         JSONObject getSnippet() {
