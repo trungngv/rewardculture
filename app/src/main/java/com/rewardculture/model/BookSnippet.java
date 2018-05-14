@@ -11,11 +11,13 @@ public class BookSnippet {
     public String bookId;
     public String title;
     public String author;
+    public String coverUrl;
 
-    public BookSnippet(String bookId, String title, String author) {
+    public BookSnippet(String bookId, String title, String author, String coverUrl) {
         this.bookId = bookId;
         this.title = title;
         this.author = author;
+        this.coverUrl = coverUrl;
     }
 
     public String getBookId() {
@@ -40,5 +42,13 @@ public class BookSnippet {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 }

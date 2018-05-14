@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -43,7 +44,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-// TODO record transactions in database
 public class BookActivity extends AppCompatActivity {
 
     private static final String TAG = "BookActivity";
@@ -105,7 +105,7 @@ public class BookActivity extends AppCompatActivity {
         String txtReview = inputReview.getText().toString();
         if (!txtReview.isEmpty()) {
             Review review = new Review(txtReview, new PostedBySnippet(firebaseUser.getUid(),
-                    firebaseUser.getDisplayName()));
+                    firebaseUser.getDisplayName(), firebaseUser.getPhotoUrl()));
             // write review to database and execute ost transaction
             dbHelper.addReview(bookRef, review, new DatabaseReference.CompletionListener() {
                 @Override
@@ -205,6 +205,9 @@ public class BookActivity extends AppCompatActivity {
 
         @Override
         protected void populateView(View v, final Review model, final int position) {
+            GlideApp.with(BookActivity.this).load(
+                    model.getPosterProfilePhotoUrl()).fitCenter().into(
+                    (ImageView) v.findViewById(R.id.cv_profile_photo));
             String posterName = model.getPosterName();
             if (posterName == null) {
                 posterName = "Anonymous user";

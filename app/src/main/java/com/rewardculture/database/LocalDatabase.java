@@ -1,5 +1,7 @@
 package com.rewardculture.database;
 
+import android.net.Uri;
+
 import com.rewardculture.model.Book;
 import com.rewardculture.model.PostedBySnippet;
 import com.rewardculture.model.Review;
@@ -72,7 +74,8 @@ public class LocalDatabase {
         List<Review> reviews = new ArrayList<>();
         for (int i = 0; i < numReviews; i++) {
             Review review = new Review(String.format("Review %d", i),
-                    new PostedBySnippet(users.get(0).getUserId(), "Anonymous"));
+                    new PostedBySnippet(users.get(0).getUserId(), "Anonymous",
+                            Uri.parse("http://www.notavailable.com")));
             reviews.add(review);
         }
 

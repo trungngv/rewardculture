@@ -44,6 +44,10 @@ public class Review implements Serializable {
         return postedBy != null ? postedBy.getName() : null;
     }
 
+    public String getPosterProfilePhotoUrl() {
+        return postedBy != null ? postedBy.getPhotoUrl() : null;
+    }
+
     public String getText() {
         return text;
     }

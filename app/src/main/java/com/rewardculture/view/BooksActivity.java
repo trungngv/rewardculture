@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,7 +23,6 @@ import com.rewardculture.model.User;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-// TODO replace place holder with actual author
 public class BooksActivity extends AppCompatActivity {
     public static final String TAG = "BooksActivity";
 
@@ -56,6 +56,7 @@ public class BooksActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
 	}
 
     private ListAdapter createListAdapter(Query query) {
@@ -68,6 +69,12 @@ public class BooksActivity extends AppCompatActivity {
         FirebaseListAdapter adapter = new FirebaseListAdapter<BookSnippet>(options) {
             @Override
             protected void populateView(View v, BookSnippet model, int position) {
+                ImageView cover = v.findViewById(R.id.cv_book_cover_photo);
+                String url = model.getCoverUrl();
+                if (url != null) {
+                    GlideApp.with(BooksActivity.this).load(
+                            model.getCoverUrl()).fitCenter().into(cover);
+                }
                 ((TextView) v.findViewById(R.id.cv_book_title)).setText(model.getTitle());
                 ((TextView) v.findViewById(R.id.cv_author)).setText(model.getAuthor());
             }

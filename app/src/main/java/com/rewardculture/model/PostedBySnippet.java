@@ -1,5 +1,7 @@
 package com.rewardculture.model;
 
+import android.net.Uri;
+
 /**
  * Snippet for information about author of a review. This is so that the review reference contains
  * all required info to display the review. It prevents the need to make a call to each user profile
@@ -11,10 +13,12 @@ public class PostedBySnippet {
 
     public String id;
     public String name;
+    public String photoUrl;
 
-    public PostedBySnippet(String id, String name) {
+    public PostedBySnippet(String id, String name, Uri photoUrl) {
         this.id = id;
         this.name = name;
+        this.photoUrl = photoUrl.toString();
     }
 
     public String getId() {
@@ -31,5 +35,13 @@ public class PostedBySnippet {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

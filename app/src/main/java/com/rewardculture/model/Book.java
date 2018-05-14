@@ -16,6 +16,7 @@ public class Book implements Serializable {
     public String author;
     public String category;
     public int year;
+    public String coverUrl;
     public Map<String, Review> reviews;
 
     public Book() {
@@ -67,6 +68,14 @@ public class Book implements Serializable {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 
     @Override
