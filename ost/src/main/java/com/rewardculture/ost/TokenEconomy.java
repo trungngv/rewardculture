@@ -31,6 +31,7 @@ public abstract class TokenEconomy {
 
     ;
 
+    public abstract String listUsers() throws IOException;
     public abstract String getCompanyUuid();
 
     public abstract String createUser(String username) throws IOException;

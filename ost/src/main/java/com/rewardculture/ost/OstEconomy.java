@@ -28,6 +28,7 @@ public class OstEconomy extends TokenEconomy {
     private static final String OST_E20_CONTRACT_ADDRESS = "0xca954C91BE676cBC4D5Ab5F624b37402E5f0d957";
 
     private static final String OST_URL = "https://playgroundapi.ost.com";
+    private static final String ENDPOINT_LISTUSERS = "/users/";
     private static final String ENDPOINT_CREATEUSER = "/users/create";
     private static final String ENDPOINT_TRANSACTION_EXECUTE = "/transaction-types/execute";
 
@@ -49,7 +50,6 @@ public class OstEconomy extends TokenEconomy {
         return builder.toString();
     }
 
-
     JSONObject buildPostData(String[] params, String[] values) {
         JSONObject data = new JSONObject();
         for (int i = 0; i < params.length; i++) {
@@ -59,6 +59,30 @@ public class OstEconomy extends TokenEconomy {
         return data;
     }
 
+    @Override
+    public String listUsers() throws IOException {
+        String[] params = {
+                "api_key",
+                "request_timestamp"
+        };
+        String[] values = {
+                API_KEY,
+                String.valueOf(System.currentTimeMillis() / 1000),
+        };
+
+        String query = buildQuery(ENDPOINT_LISTUSERS, params, values);
+        String signature = Crypto.signToHex(API_SECRET, query);
+        query = String.format("%s&signature=%s", query, signature);
+
+        Request request = new Request.Builder()
+                .url(OST_URL + query)
+                .get()
+                .build();
+        Response response = new OkHttpClient().newCall(request).execute();
+
+        return response.body().string();
+
+    }
     @Override
     public String getCompanyUuid() {
         return COMPANY_UUID;
