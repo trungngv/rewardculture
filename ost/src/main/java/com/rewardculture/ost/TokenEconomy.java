@@ -29,8 +29,6 @@ public abstract class TokenEconomy {
         }
     }
 
-    ;
-
     public abstract String listUsers() throws IOException;
     public abstract String getCompanyUuid();
 

@@ -107,8 +107,8 @@ public class OstEconomyTest {
                 result.getString("from_uuid"));
         assertNotNull("to_uuid not found in response",
                 result.getString("to_uuid"));
-        assertNotNull("transaction_kind not found in response",
-                result.getString("transaction_kind"));
+        assertNotNull("action_id not found in response",
+                result.getString("action_id"));
 
     }
 }
