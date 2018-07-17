@@ -2,9 +2,6 @@ package com.rewardculture.model;
 
 import com.google.gson.JsonObject;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class Transaction {
 
     static final String TRANSACTION_ID = "id";
@@ -20,7 +17,7 @@ public class Transaction {
 
     public Transaction() {}
 
-    public static Transaction fromJsonObject(JsonObject obj) throws JSONException {
+    public static Transaction fromJsonObject(JsonObject obj) {
         Transaction t = new Transaction();
         if (obj.has(TRANSACTION_ID)) {
             t.setTransactionId(obj.get(TRANSACTION_ID).getAsString());
