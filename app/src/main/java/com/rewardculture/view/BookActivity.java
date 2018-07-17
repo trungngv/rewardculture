@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.JsonObject;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
 import com.rewardculture.R;
@@ -32,11 +33,9 @@ import com.rewardculture.model.PostedBySnippet;
 import com.rewardculture.model.Review;
 import com.rewardculture.model.Transaction;
 import com.rewardculture.model.User;
-import com.rewardculture.ost.OstEconomy;
-import com.rewardculture.ost.TokenEconomy;
+import com.rewardculture.ost.RewardCultureEconomy;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -49,7 +48,7 @@ public class BookActivity extends AppCompatActivity {
     private static final String TAG = "BookActivity";
 
     FirebaseDatabaseHelper dbHelper;
-    TokenEconomy economy;
+    RewardCultureEconomy economy;
     Book book;
     DatabaseReference bookRef;
     FirebaseListAdapter<Review> reviewsAdapter;
@@ -82,7 +81,7 @@ public class BookActivity extends AppCompatActivity {
         user = (User) intent.getSerializableExtra(Constants.INTENT_USER);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        economy = new OstEconomy();
+        economy = new RewardCultureEconomy();
         dbHelper = FirebaseDatabaseHelper.getInstance();
         bookRef = dbHelper.getBook(bookId);
         bookRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -116,7 +115,7 @@ public class BookActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                String response = economy.executeReviewTransaction(user.getOstId());
+                                JsonObject response = economy.executeReviewTransaction(user.getOstId());
                                 Log.d(TAG, "review transaction response: " + response);
                                 logTransaction(response);
                             } catch (IOException e) {
@@ -171,7 +170,7 @@ public class BookActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            String response = economy.executeLikeTransaction(reviewer.getOstId());
+                            JsonObject response = economy.executeLikeTransaction(reviewer.getOstId());
                             Log.d(TAG, "like transaction response: " + response);
                             logTransaction(response);
                         } catch (IOException e) {
@@ -190,7 +189,7 @@ public class BookActivity extends AppCompatActivity {
         });
     }
 
-    void logTransaction(String transactionResponse) throws JSONException {
+    void logTransaction(JsonObject transactionResponse) throws JSONException {
         Transaction t = Transaction.fromJsonObject(
                 economy.parseTransactionResponse(transactionResponse));
         t.setTransactionTime(System.currentTimeMillis());

@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.JsonObject;
 import com.rewardculture.BuildConfig;
 import com.rewardculture.R;
 import com.rewardculture.database.FirebaseDatabaseHelper;
@@ -33,11 +34,7 @@ import com.rewardculture.misc.Constants;
 import com.rewardculture.misc.Utils;
 import com.rewardculture.model.CategorySnippet;
 import com.rewardculture.model.User;
-import com.rewardculture.ost.OstEconomy;
-import com.rewardculture.ost.TokenEconomy;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.rewardculture.ost.RewardCultureEconomy;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,17 +43,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-// TODO
-// 1. Add log out button (for easier testing)
-// 2. Add view balance (kinda like wallet)
-
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 100;
 
     FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
     FirebaseAuth auth;
-    TokenEconomy economy;
+    RewardCultureEconomy economy;
     User user;
 
     @BindView(R.id.listview)
@@ -73,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        economy = new OstEconomy();
+        economy = new RewardCultureEconomy();
         auth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = auth.getCurrentUser();
         if (firebaseUser == null) {
@@ -126,14 +119,14 @@ public class MainActivity extends AppCompatActivity {
                     new Thread(new Runnable() {
                         public void run() {
                             try {
-                                JSONObject result = economy.parseUserResponse(
+                                JsonObject result = economy.parseUserResponse(
                                         economy.createUser(firebaseUser.getUid()));
-                                user = new User(firebaseUser.getUid(), result.getString("uuid"));
+                                user = new User(firebaseUser.getUid(), result.get("uuid").getAsString());
                                 dbHelper.updateUser(user);
                                 Log.d(TAG, "Ost id generated for " + firebaseUser.getDisplayName());
                             } catch (IOException e) {
                                 Log.e(TAG, e.getMessage(), e);
-                            } catch (JSONException e) {
+                            } catch (Exception e) {
                                 Log.e(TAG, e.getMessage(), e);
                             }
                         }

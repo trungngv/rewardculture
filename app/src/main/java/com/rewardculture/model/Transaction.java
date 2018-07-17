@@ -1,47 +1,49 @@
 package com.rewardculture.model;
 
+import com.google.gson.JsonObject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Transaction {
 
-    static final String TRANSACTION_UUID = "transaction_uuid";
-    static final String FROM_UUID = "from_uuid";
-    static final String TO_UUID = "to_uuid";
-    static final String TRANSACTION_KIND = "transaction_kind";
+    static final String TRANSACTION_ID = "id";
+    static final String FROM_UUID = "from_user_id";
+    static final String TO_UUID = "to_user_id";
+    static final String ACTION_ID = "action_id";
 
-    String transactionUuid;
+    String transactionId;
     String fromUuid;
     String toUuid;
-    String transactionKind;
+    String actionId;
     long transactionTime;
 
     public Transaction() {}
 
-    public static Transaction fromJsonObject(JSONObject obj) throws JSONException {
+    public static Transaction fromJsonObject(JsonObject obj) throws JSONException {
         Transaction t = new Transaction();
-        if (obj.has(TRANSACTION_UUID)) {
-            t.setTransactionUuid(obj.getString(TRANSACTION_UUID));
+        if (obj.has(TRANSACTION_ID)) {
+            t.setTransactionId(obj.get(TRANSACTION_ID).getAsString());
         }
         if (obj.has(FROM_UUID)) {
-            t.setFromUuid(obj.getString(FROM_UUID));
+            t.setFromUuid(obj.get(FROM_UUID).getAsString());
         }
         if (obj.has(TO_UUID)) {
-            t.setToUuid(obj.getString(TO_UUID));
+            t.setToUuid(obj.get(TO_UUID).getAsString());
         }
-        if (obj.has(TRANSACTION_KIND)) {
-            t.setTransactionKind(obj.getString(TRANSACTION_KIND));
+        if (obj.has(ACTION_ID)) {
+            t.setActionId(obj.get(ACTION_ID).getAsString());
         }
 
         return t;
     }
 
-    public String getTransactionUuid() {
-        return transactionUuid;
+    public String getTransactionId() {
+        return transactionId;
     }
 
-    public void setTransactionUuid(String transactionUuid) {
-        this.transactionUuid = transactionUuid;
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getFromUuid() {
@@ -60,12 +62,12 @@ public class Transaction {
         this.toUuid = toUuid;
     }
 
-    public String getTransactionKind() {
-        return transactionKind;
+    public String getActionId() {
+        return actionId;
     }
 
-    public void setTransactionKind(String transactionKind) {
-        this.transactionKind = transactionKind;
+    public void setActionId(String actionId) {
+        this.actionId = actionId;
     }
 
     public long getTransactionTime() {
@@ -78,6 +80,7 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return String.format("transaction{transactionUuid: %s, fromUuid: %s, toUuid: %s, transactionKind: %s, transactionTime: %d}");
+        return String.format("transaction{transactionId: %s, fromUuid: %s, toUuid: %s, actionId: %s, transactionTime: %d}",
+                transactionId, fromUuid, toUuid, actionId, transactionTime);
     }
 }
