@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -54,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
     RewardCultureEconomy economy;
 
+    MainCategoriesFragment categoriesFragment;
+    WalletFragment walletFragment;
+
     public static Intent createIntent(Context context, IdpResponse response) {
         return new Intent().setClass(context, MainActivity.class)
                 .putExtra(ExtraConstants.IDP_RESPONSE, response);
@@ -98,9 +103,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 }
 
-                MainCategoriesFragment fragment = MainCategoriesFragment.newInstance(user);
+                categoriesFragment = MainCategoriesFragment.newInstance(user);
+                walletFragment = WalletFragment.newInstance(user);
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.fragment_container, fragment).commit();
+                        .add(R.id.fragment_container, categoriesFragment, "products").commit();
             }
 
         }
@@ -245,6 +251,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showFragment(int fragmentId) {
         Utils.showToastAndLog(this, "Showing " + fragmentId, MainActivity.TAG);
+        MainCategoriesFragment.newInstance(user);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        switch (fragmentId) {
+            case R.id.nav_products:
+                transaction.replace(R.id.fragment_container, categoriesFragment, "products");
+                break;
+            case R.id.nav_wallet:
+                transaction.replace(R.id.fragment_container, walletFragment, "wallet");
+                break;
+            default:
+                break;
+        }
+        // and add the transaction to the back stack so the user can navigate back
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
 }

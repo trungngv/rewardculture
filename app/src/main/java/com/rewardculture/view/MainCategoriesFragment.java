@@ -71,7 +71,7 @@ public class MainCategoriesFragment extends android.support.v4.app.ListFragment 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_categories, container, false);
+        View view = inflater.inflate(R.layout.fragment_categories, container, false);
         return view;
         }
 
