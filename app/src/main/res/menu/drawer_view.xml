@@ -4,6 +4,11 @@
     android:layout_height="match_parent">
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_products"
+            android:icon="@drawable/ic_shop"
+            android:title="@string/products" />
+
+        <item
             android:id="@+id/nav_wallet"
             android:icon="@drawable/ic_wallet"
             android:title="@string/wallet" />

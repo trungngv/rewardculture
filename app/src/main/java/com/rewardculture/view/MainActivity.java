@@ -3,6 +3,7 @@ package com.rewardculture.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -13,32 +14,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.util.ExtraConstants;
-import com.firebase.ui.database.FirebaseListAdapter;
-import com.firebase.ui.database.FirebaseListOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.JsonObject;
 import com.rewardculture.BuildConfig;
 import com.rewardculture.R;
 import com.rewardculture.database.FirebaseDatabaseHelper;
-import com.rewardculture.misc.Constants;
 import com.rewardculture.misc.Utils;
-import com.rewardculture.model.CategorySnippet;
 import com.rewardculture.model.User;
 import com.rewardculture.ost.RewardCultureEconomy;
 
@@ -49,20 +41,18 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 100;
-
-    FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
-    FirebaseAuth auth;
-    RewardCultureEconomy economy;
-    User user;
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
 
-    @BindView(R.id.listview)
-    ListView listView;
+    FirebaseAuth auth;
+    User user;
+
+    FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
+    RewardCultureEconomy economy;
 
     public static Intent createIntent(Context context, IdpResponse response) {
         return new Intent().setClass(context, MainActivity.class)
@@ -82,73 +72,44 @@ public class MainActivity extends AppCompatActivity {
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
-        setupNavigationView();
+        // set up navigation drawer view
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
-        economy = new RewardCultureEconomy();
         auth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = auth.getCurrentUser();
         if (firebaseUser == null) {
-            //startActivity(AuthUiActivity.createIntent(this));
-            //finish();
-            //return;
-
             startActivityForResult(
                     AuthUI.getInstance().createSignInIntentBuilder()
                             .setAvailableProviders(getSelectedProviders())
                             .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                             .build(),
                     RC_SIGN_IN);
-            //finish();
-            //return;
         } else {
-            generateOstId(firebaseUser);
-
-            //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
             Utils.showToastAndLog(this, "signed in user: " + firebaseUser.getDisplayName(), TAG);
-            Query query = dbHelper.getBookCategories();
-            listView.setAdapter(createListAdapter(query));
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v,
-                                        int position, long id) {
-                    CategorySnippet category = (CategorySnippet) listView.getItemAtPosition(position);
-                    Intent intent = new Intent(MainActivity.this, BooksActivity.class);
-                    intent.putExtra(Constants.INTENT_CATEGORY, category.id);
-                    intent.putExtra(Constants.INTENT_USER, user);
-                    startActivity(intent);
+            generateOstId(firebaseUser);
+            //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
+
+            if (findViewById(R.id.fragment_container) != null) {
+                // If we're being restored from a previous state,
+                // then we don't need to do anything and should return or else
+                // we could end up with overlapping fragments.
+                if (savedInstanceState != null) {
+                    return;
                 }
-            });
+
+                MainCategoriesFragment fragment = MainCategoriesFragment.newInstance(user);
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.fragment_container, fragment).commit();
+            }
+
         }
-    }
-
-    private void setupNavigationView() {
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
-                        drawerLayout.closeDrawers();
-                        switch (menuItem.getItemId()) {
-                            case R.id.nav_logout:
-                                logOut();
-                                break;
-                            case R.id.nav_wallet:
-                                showWalletFragment();
-                                break;
-                            default:
-                                break;
-                        }
-
-                        return true;
-                    }
-                });
     }
 
     private void logOut() {
         if (auth != null) {
             auth.signOut();
             Log.d(TAG, "signed out");
-            // do we call auth activity here?
             startActivityForResult(
                     AuthUI.getInstance().createSignInIntentBuilder()
                             .setAvailableProviders(getSelectedProviders())
@@ -157,10 +118,6 @@ public class MainActivity extends AppCompatActivity {
                     RC_SIGN_IN);
         }
 
-    }
-
-    private void showWalletFragment() {
-        Utils.showToastAndLog(this, "Showing wallet later", MainActivity.TAG);
     }
 
     /**
@@ -217,25 +174,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // TODO change to FirebaseRecyclerAdapter for efficiency later on
-    private ListAdapter createListAdapter(Query query) {
-        // NOTE: setLifecycleOwner must be set for this to start listening to database events
-        FirebaseListOptions options = new FirebaseListOptions.Builder<CategorySnippet>()
-                .setQuery(query, CategorySnippet.class)
-                .setLifecycleOwner(this)
-                .setLayout(R.layout.cardview_category)
-                .build();
-
-        FirebaseListAdapter adapter = new FirebaseListAdapter<CategorySnippet>(options) {
-            @Override
-            protected void populateView(View v, CategorySnippet model, int position) {
-                ((TextView) v.findViewById(R.id.cv_category_name)).setText(model.getName());
-            }
-        };
-
-        return adapter;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -267,15 +205,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Selected providers for authentication.
+     *
+     * @return
+     */
     private List<AuthUI.IdpConfig> getSelectedProviders() {
         return Arrays.asList(
                 new AuthUI.IdpConfig.GoogleBuilder().build(),
                 new AuthUI.IdpConfig.EmailBuilder().build());
     }
 
-
     private void showSnackbar(@StringRes int errorMessageRes) {
-        Snackbar.make(listView, errorMessageRes, Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(R.id.content_frame), errorMessageRes, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        item.setChecked(true);
+        drawerLayout.closeDrawers();
+        switch (item.getItemId()) {
+            case R.id.nav_logout:
+                logOut();
+                break;
+            case R.id.nav_wallet:
+            case R.id.nav_products:
+                showFragment(item.getItemId());
+                break;
+            case R.id.nav_settings:
+                Toast.makeText(this, "Not implemented yet", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+
+        return true;
+
+    }
+
+    private void showFragment(int fragmentId) {
+        Utils.showToastAndLog(this, "Showing " + fragmentId, MainActivity.TAG);
     }
 
 }

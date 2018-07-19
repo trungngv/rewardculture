@@ -22,9 +22,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <!-- Layout to contain contents of main body of screen (drawer will slide over this) -->
-        <ListView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/listview"
+        <!-- Layout to contain fragment contents -->
+        <FrameLayout
+            android:id="@+id/fragment_container"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:gravity="center"
@@ -32,6 +32,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
     </android.support.constraint.ConstraintLayout>
 
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->

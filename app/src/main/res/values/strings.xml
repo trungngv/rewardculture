@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name">Reward Culture</string>
+    <string name="app_name">Reward Culture</string>
     <string name="review">Review</string>
     <string name="research">Research</string>
     <string name="send">Send</string>
@@ -86,4 +86,5 @@
     <string name="wallet">Wallet</string>
     <string name="logout">Log out</string>
     <string name="settings">Settings</string>
+    <string name="products">Products</string>
 </resources>
