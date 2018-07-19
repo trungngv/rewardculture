@@ -1,6 +1,7 @@
 <resources>
 	<string name="app_name">Reward Culture</string>
     <string name="review">Review</string>
+    <string name="research">Research</string>
     <string name="send">Send</string>
 
     <!-- Chooser -->
@@ -82,4 +83,6 @@
         (https://console.firebase.google.com/project/_/authentication/providers)
     </string>
     <string name="hint_message">Say something…</string>
+    <string name="wallet">Wallet</string>
+    <string name="logout">Log out</string>
 </resources>
