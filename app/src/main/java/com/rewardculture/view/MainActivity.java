@@ -74,28 +74,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        // Set up tool bar
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        menuItem.setChecked(true);
-                        // close drawer when item is tapped
-                        drawerLayout.closeDrawers();
-
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
-
-                        return true;
-                    }
-                });
+        setupNavigationView();
 
         economy = new RewardCultureEconomy();
         auth = FirebaseAuth.getInstance();
@@ -133,6 +120,49 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setupNavigationView() {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        menuItem.setChecked(true);
+                        drawerLayout.closeDrawers();
+                        switch (menuItem.getItemId()) {
+                            case R.id.nav_logout:
+                                logOut();
+                                break;
+                            case R.id.nav_wallet:
+                                showWalletFragment();
+                                break;
+                            default:
+                                break;
+                        }
+
+                        return true;
+                    }
+                });
+    }
+
+    private void logOut() {
+        if (auth != null) {
+            auth.signOut();
+            Log.d(TAG, "signed out");
+            // do we call auth activity here?
+            startActivityForResult(
+                    AuthUI.getInstance().createSignInIntentBuilder()
+                            .setAvailableProviders(getSelectedProviders())
+                            .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                            .build(),
+                    RC_SIGN_IN);
+        }
+
+    }
+
+    private void showWalletFragment() {
+        Utils.showToastAndLog(this, "Showing wallet later", MainActivity.TAG);
+    }
+
     /**
      * @param item
      * @return
@@ -147,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     /**
      * Check if user has an associated ost id. if not then generate id.
      *
@@ -247,12 +278,4 @@ public class MainActivity extends AppCompatActivity {
         Snackbar.make(listView, errorMessageRes, Snackbar.LENGTH_LONG).show();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-//        if (auth != null) {
-//            auth.signOut();
-//            Log.d(TAG, "signing out user");
-//        }
-    }
 }
