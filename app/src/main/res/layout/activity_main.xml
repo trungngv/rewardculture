@@ -15,12 +15,13 @@
             android:id="@+id/toolbar"
             android:layout_width="0dp"
             android:layout_height="?android:actionBarSize"
-            android:background="?android:colorPrimary"
+            android:background="@color/colorPrimaryDark"
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleTextColor="@android:color/white" />
 
         <!-- Layout to contain fragment contents -->
         <FrameLayout
