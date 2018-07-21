@@ -2,7 +2,14 @@ package com.rewardculture.ost;
 
 import com.google.gson.JsonObject;
 import com.ost.OSTSDK;
+import com.ost.services.OSTAPIService;
+import com.ost.services.v1_1.Actions;
+import com.ost.services.v1_1.AirDrops;
+import com.ost.services.v1_1.Balances;
+import com.ost.services.v1_1.Ledger;
 import com.ost.services.v1_1.Manifest;
+import com.ost.services.v1_1.Transactions;
+import com.ost.services.v1_1.Users;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -46,7 +53,7 @@ public class OstSdk {
      * @throws IOException
      */
     public JsonObject createUser(String username) throws IOException {
-        com.ost.services.v1.Users userService = services.users;
+        Users userService = services.users;
         HashMap <String,Object> params = new HashMap();
         params.put("name", username);
         JsonObject response = userService.create(params);
@@ -55,7 +62,7 @@ public class OstSdk {
     }
 
     public JsonObject listUsers() throws IOException {
-        com.ost.services.v1.Users userService = services.users;
+        Users userService = services.users;
         HashMap <String,Object> params = new HashMap();
         JsonObject response = userService.list(params);
 
@@ -63,7 +70,7 @@ public class OstSdk {
     }
 
     public JsonObject listActions() throws IOException {
-        com.ost.services.v1.Actions actions = services.actions;
+        Actions actions = services.actions;
         HashMap <String,Object> params = new HashMap();
         JsonObject response = actions.list(params);
 
@@ -71,7 +78,7 @@ public class OstSdk {
     }
 
     public JsonObject airdrop(String userId, float amount) throws IOException {
-        com.ost.services.v1.AirDrops airdropService = services.airdrops;
+        AirDrops airdropService = services.airdrops;
         HashMap <String,Object> params = new HashMap();
         params.put("amount", String.valueOf(amount));
         params.put("user_ids", userId);
@@ -90,8 +97,7 @@ public class OstSdk {
      */
     public JsonObject createActionFixedAmount(String name, String kind, float transactionValue,
                                               float commissionPercent) throws IOException {
-        com.ost.services.v1.Actions actionService = services.actions;
-
+        Actions actionService = services.actions;
         HashMap <String,Object> params = new HashMap();
         params.put("name", name);
         params.put("kind", kind);
@@ -107,8 +113,7 @@ public class OstSdk {
 
     public JsonObject executeTransaction(String fromOstId, String toOstId, String actionId)
             throws IOException {
-        com.ost.services.v1.Transactions transactions = services.transactions;
-
+        Transactions transactions = services.transactions;
         Map<String, Object> params = new HashMap<>();
         params.put("from_user_id", fromOstId);
         params.put("to_user_id", toOstId);
@@ -116,5 +121,35 @@ public class OstSdk {
         JsonObject response = transactions.execute(params);
 
         return response;
+    }
+
+    /**
+     * Returns the user balance.
+     * @param userId
+     * @return JsonObject containing "available_balance", "airdropped_balance", and "token_balance"
+     * @throws IOException
+     * @throws OSTAPIService.MissingParameter
+     */
+    public JsonObject getUserBalance(String userId) throws IOException, OSTAPIService.MissingParameter {
+        Balances balances = services.balances;
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", userId);
+        JsonObject response = balances.get(params);
+
+        return response;
+    }
+
+    public JsonObject getTransactions(String userId) throws IOException, OSTAPIService.MissingParameter {
+        Ledger ledger = services.ledger;
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", userId);
+        JsonObject response = ledger.get(params);
+
+        return response;
+    }
+
+    public static void main(String[] args) throws IOException, OSTAPIService.MissingParameter {
+        OstSdk sdk = OstSdk.getInstance();
+        System.out.println(sdk.getTransactions("6a791a28-f156-49dd-a751-263a053fca25"));
     }
 }

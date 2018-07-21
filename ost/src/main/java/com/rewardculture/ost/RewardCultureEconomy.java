@@ -1,11 +1,13 @@
 package com.rewardculture.ost;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.ost.services.OSTAPIService;
 
 import java.io.IOException;
 
 /**
- * For managing the RewardCulture economy.
+ * For managing the RewardCulture economy (currently using OST blockchain services)
  */
 public class RewardCultureEconomy {
     private static final String SUCCESS = "success";
@@ -54,12 +56,46 @@ public class RewardCultureEconomy {
         return ost.createUser(username);
     }
 
+    public JsonObject getUserBalance(String userId) throws IOException {
+        try {
+            JsonObject response = ost.getUserBalance(userId);
+            return response.getAsJsonObject("data").getAsJsonObject("balance");
+        } catch (OSTAPIService.MissingParameter e) {
+
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns all transactions involving the user with user id. Transactions are sorted by most
+     * frequent first.
+     *
+     * @param userId
+     * @return
+     * @throws IOException
+     */
+    public JsonArray getTransactions(String userId) throws IOException {
+        try {
+            JsonObject response = ost.getTransactions(userId);
+            return response.getAsJsonObject("data").getAsJsonArray("transactions");
+        } catch (OSTAPIService.MissingParameter e) {
+
+        }
+
+        return null;
+    }
+
     public JsonObject executeReviewTransaction(String posterUuid) throws IOException {
-        return ost.executeTransaction(COMPANY_UUID, posterUuid, ActionType.REVIEW.actionId);
+        JsonObject response = ost.executeTransaction(COMPANY_UUID, posterUuid,
+                ActionType.REVIEW.actionId);
+        return parseTransactionResponse(response);
     }
 
     public JsonObject executeLikeTransaction(String posterUuid) throws IOException {
-        return ost.executeTransaction(COMPANY_UUID, posterUuid, ActionType.LIKE.actionId);
+        JsonObject response = ost.executeTransaction(COMPANY_UUID, posterUuid,
+                ActionType.LIKE.actionId);
+        return parseTransactionResponse(response);
     }
 
     /**
@@ -68,7 +104,7 @@ public class RewardCultureEconomy {
      * @param response
      * @return a json object if transaction was successful, otherwise returns null.
      */
-    public JsonObject parseTransactionResponse(JsonObject response) {
+    JsonObject parseTransactionResponse(JsonObject response) {
         Boolean success = response.get(SUCCESS).getAsBoolean();
         return success ? response.getAsJsonObject(DATA).getAsJsonObject(TRANSACTION) : null;
     }
@@ -94,9 +130,12 @@ public class RewardCultureEconomy {
 
     public static void main(String args[]) throws IOException {
         RewardCultureEconomy economy = new RewardCultureEconomy();
-        JsonObject response = economy.createUser("bluesky101");
-        System.out.println(economy.parseUserResponse(response));
+        String aliceId = "6a791a28-f156-49dd-a751-263a053fca25";
+        //JsonObject response = economy.createUser("bluesky101");
+        //System.out.println(economy.parseUserResponse(response));
         //JsonObject response = economy.executeReviewTransaction("6a791a28-f156-49dd-a751-263a053fca25");
         //JsonObject transaction = economy.parseTransactionResponse(response);
+        //System.out.println(economy.getUserBalance(aliceId));
+        System.out.println(economy.getTransactions(aliceId));
     }
 }
