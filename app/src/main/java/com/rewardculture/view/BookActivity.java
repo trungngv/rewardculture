@@ -120,7 +120,7 @@ public class BookActivity extends AppCompatActivity {
                                 logTransaction(response);
                             } catch (IOException e) {
                                 Log.e(TAG, e.getMessage(), e);
-                            } catch (JSONException e) {
+                            } catch (Exception e) {
                                 Log.e(TAG, e.getMessage(), e);
                             }
                         }
@@ -175,7 +175,7 @@ public class BookActivity extends AppCompatActivity {
                             logTransaction(response);
                         } catch (IOException e) {
                             Log.e(TAG, e.getMessage(), e);
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             Log.e(TAG, e.getMessage(), e);
                         }
                     }
@@ -189,9 +189,8 @@ public class BookActivity extends AppCompatActivity {
         });
     }
 
-    void logTransaction(JsonObject transactionResponse) throws JSONException {
-        Transaction t = Transaction.fromJsonObject(
-                economy.parseTransactionResponse(transactionResponse));
+    void logTransaction(JsonObject transactionResponse) {
+        Transaction t = Transaction.fromJsonObject(transactionResponse);
         t.setTransactionTime(System.currentTimeMillis());
         dbHelper.logTransaction(t);
     }

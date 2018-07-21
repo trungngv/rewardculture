@@ -1,6 +1,7 @@
 package com.rewardculture.view;
 
 import android.app.ListFragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -66,6 +67,8 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
     }
 
     private ListAdapter createListAdapter() {
+        // TODO receive transactions from OST with AsycnTask
+
         String[] values = {"First", "Second", "Third"};
         ListAdapter adapter = new ArrayAdapter<>(getContext(), R.layout.cardview_transaction,
                 R.id.txt_transaction,
