@@ -22,7 +22,6 @@ public class FirebaseDatabaseHelper {
     private static final String REF_CATEGORIES = "categories";
     private static final String REF_CATEGORY = "category";
     private static final String REF_BOOKS = "books";
-    private static final String REF_BOOK = "books";
     private static final String REF_REVIEWS = "reviews";
     private static final String REF_USERS = "users";
     private static final String REF_TRANSACTION = "transactions";

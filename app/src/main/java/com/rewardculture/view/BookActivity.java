@@ -191,7 +191,6 @@ public class BookActivity extends AppCompatActivity {
 
     void logTransaction(JsonObject transactionResponse) {
         Transaction t = Transaction.fromJsonObject(transactionResponse);
-        t.setTransactionTime(System.currentTimeMillis());
         dbHelper.logTransaction(t);
     }
 
