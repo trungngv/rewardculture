@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     User user;
 
     FirebaseDatabaseHelper dbHelper = FirebaseDatabaseHelper.getInstance();
-    RewardCultureEconomy economy;
+    RewardCultureEconomy economy = new RewardCultureEconomy();
 
     MainCategoriesFragment categoriesFragment;
     WalletFragment walletFragment;
@@ -95,19 +95,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             generateOstId(firebaseUser);
             //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
 
-            if (findViewById(R.id.fragment_container) != null) {
-                // If we're being restored from a previous state,
-                // then we don't need to do anything and should return or else
-                // we could end up with overlapping fragments.
-                if (savedInstanceState != null) {
-                    return;
-                }
 
-                categoriesFragment = MainCategoriesFragment.newInstance(user);
-                walletFragment = WalletFragment.newInstance(user);
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.fragment_container, categoriesFragment, "products").commit();
+            // If we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
             }
+
+            categoriesFragment = MainCategoriesFragment.newInstance();
+            walletFragment = WalletFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, categoriesFragment, "products").commit();
 
         }
     }
@@ -153,6 +152,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Will be null if this user does not exist in Firebase
                 user = (dataSnapshot.getValue(User.class));
+                // because user may be null when these were created
+                walletFragment.updateUser(user);
+                categoriesFragment.updateUser(user);
                 // If user does not exist or does not have an associated ost id, create the user
                 if (user == null || user.getOstId() == null) {
                     new Thread(new Runnable() {
@@ -161,6 +163,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 JsonObject result = economy.parseUserResponse(
                                         economy.createUser(firebaseUser.getUid()));
                                 user = new User(firebaseUser.getUid(), result.get("uuid").getAsString());
+                                walletFragment.updateUser(user);
+                                categoriesFragment.updateUser(user);
                                 dbHelper.updateUser(user);
                                 Log.d(TAG, "Ost id generated for " + firebaseUser.getDisplayName());
                             } catch (IOException e) {
@@ -249,9 +253,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    /**
+     * Switching between fragments.
+     * @param fragmentId
+     */
     private void showFragment(int fragmentId) {
-        Utils.showToastAndLog(this, "Showing " + fragmentId, MainActivity.TAG);
-        MainCategoriesFragment.newInstance(user);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         switch (fragmentId) {

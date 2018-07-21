@@ -126,7 +126,7 @@ public class OstSdk {
     /**
      * Returns the user balance.
      * @param userId
-     * @return JsonObject containing "available_balance", "airdropped_balance", and "token_balance"
+     * @return JsonObject
      * @throws IOException
      * @throws OSTAPIService.MissingParameter
      */

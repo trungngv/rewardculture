@@ -8,29 +8,27 @@ public class Transaction {
     static final String FROM_UUID = "from_user_id";
     static final String TO_UUID = "to_user_id";
     static final String ACTION_ID = "action_id";
+    static final String TIMESTAMP = "timestamp";
+    static final String AMOUNT = "amount";
 
     String transactionId;
     String fromUuid;
     String toUuid;
     String actionId;
     long transactionTime;
+    float amount;
 
-    public Transaction() {}
+    public Transaction() {
+    }
 
     public static Transaction fromJsonObject(JsonObject obj) {
         Transaction t = new Transaction();
-        if (obj.has(TRANSACTION_ID)) {
-            t.setTransactionId(obj.get(TRANSACTION_ID).getAsString());
-        }
-        if (obj.has(FROM_UUID)) {
-            t.setFromUuid(obj.get(FROM_UUID).getAsString());
-        }
-        if (obj.has(TO_UUID)) {
-            t.setToUuid(obj.get(TO_UUID).getAsString());
-        }
-        if (obj.has(ACTION_ID)) {
-            t.setActionId(obj.get(ACTION_ID).getAsString());
-        }
+        t.setTransactionId(obj.get(TRANSACTION_ID).getAsString());
+        t.setFromUuid(obj.get(FROM_UUID).getAsString());
+        t.setToUuid(obj.get(TO_UUID).getAsString());
+        t.setActionId(obj.get(ACTION_ID).getAsString());
+        t.setTransactionTime(obj.get(TIMESTAMP).getAsLong());
+        t.setAmount(obj.get(AMOUNT).getAsFloat());
 
         return t;
     }
@@ -79,5 +77,13 @@ public class Transaction {
     public String toString() {
         return String.format("transaction{transactionId: %s, fromUuid: %s, toUuid: %s, actionId: %s, transactionTime: %d}",
                 transactionId, fromUuid, toUuid, actionId, transactionTime);
+    }
+
+    public float getAmount() {
+        return amount;
+    }
+
+    public void setAmount(float amount) {
+        this.amount = amount;
     }
 }

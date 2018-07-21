@@ -50,22 +50,18 @@ public class MainCategoriesFragment extends android.support.v4.app.ListFragment 
      * this fragment using the provided parameters.
      * @return A new instance of fragment MainCategoriesFragment.
      */
-    public static MainCategoriesFragment newInstance(User user) {
-        MainCategoriesFragment fragment = new MainCategoriesFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_USER, user);
-        fragment.setArguments(args);
-
-        return fragment;
+    public static MainCategoriesFragment newInstance() {
+        return new MainCategoriesFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            user = (User) getArguments().getSerializable(ARG_USER);
-        }
         dbHelper = FirebaseDatabaseHelper.getInstance();
+    }
+
+    public void updateUser(User user) {
+        this.user = user;
     }
 
     @Override
