@@ -104,13 +104,21 @@ public class OstSdk {
         params.put("currency", "BT");
         params.put("arbitrary_amount", false);
         params.put("amount", transactionValue);
-        params.put("arbitrary_commission", false);
+        params.put("arbitrary_commission", "false");
         params.put("commission_percent", commissionPercent);
         JsonObject response = actionService.create(params);
 
         return response;
     }
 
+    /**
+     * Execute transaction with fixed amount when action is first created.
+     * @param fromOstId
+     * @param toOstId
+     * @param actionId
+     * @return
+     * @throws IOException
+     */
     public JsonObject executeTransaction(String fromOstId, String toOstId, String actionId)
             throws IOException {
         Transactions transactions = services.transactions;
@@ -150,6 +158,6 @@ public class OstSdk {
 
     public static void main(String[] args) throws IOException, OSTAPIService.MissingParameter {
         OstSdk sdk = OstSdk.getInstance();
-        System.out.println(sdk.getTransactions("6a791a28-f156-49dd-a751-263a053fca25"));
+        System.out.println(sdk.listActions());
     }
 }

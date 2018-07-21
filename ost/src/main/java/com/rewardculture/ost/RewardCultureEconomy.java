@@ -26,7 +26,8 @@ public class RewardCultureEconomy {
      */
     public enum ActionType {
         REVIEW("29914"),
-        LIKE("29913");
+        LIKE("29913"),
+        BUY("39174");
 
         final String actionId;
 
@@ -38,6 +39,10 @@ public class RewardCultureEconomy {
         public String toString() {
             return actionId;
         }
+    }
+
+    public String getCompanyOstId() {
+        return COMPANY_UUID;
     }
 
     /**
@@ -107,6 +112,13 @@ public class RewardCultureEconomy {
         return parseTransactionResponse(response);
     }
 
+    public JsonObject executeBuyTransaction(String buyerId) throws IOException {
+        JsonObject response = ost.executeTransaction(buyerId, COMPANY_UUID,
+                ActionType.BUY.actionId);
+
+        return parseTransactionResponse(response);
+    }
+
     /**
      * Parse transaction response.
      *
@@ -146,7 +158,6 @@ public class RewardCultureEconomy {
         //System.out.println(response);
         //System.out.println(economy.getUserBalances(aliceId));
         //System.out.println(economy.getTransactions(aliceId));
-        SimpleDateFormat formatter = new SimpleDateFormat("d MMM yyyy, HH:mm:ss");
-        System.out.println(formatter.format(new Date(1532135588734L)));
+
     }
 }
