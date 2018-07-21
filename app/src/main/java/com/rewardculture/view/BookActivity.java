@@ -1,5 +1,6 @@
 package com.rewardculture.view;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,10 +37,6 @@ import com.rewardculture.model.Transaction;
 import com.rewardculture.model.User;
 import com.rewardculture.ost.RewardCultureEconomy;
 
-import org.json.JSONException;
-
-import java.io.IOException;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -70,7 +67,13 @@ public class BookActivity extends AppCompatActivity {
     EditText inputReview;
 
     @BindView(R.id.btn_review)
-    Button btn;
+    Button btnReview;
+
+    @BindView(R.id.btn_buy)
+    Button btnBuy;
+
+    @BindView(R.id.btn_share)
+    Button btnShare;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +103,40 @@ public class BookActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Helper method to execute a transaction in a new thread.
+     *
+     * TODO use async task to update status if I have enough time
+     * @param action
+     * @param ostId
+     */
+    void executeTransaction(final RewardCultureEconomy.ActionType action, final String ostId) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JsonObject response = null;
+                    switch (action) {
+                        case REVIEW:
+                            response = economy.executeReviewTransaction(ostId);
+                            break;
+                        case LIKE:
+                            response = economy.executeLikeTransaction(ostId);
+                            break;
+                        case BUY:
+                            response = economy.executeBuyTransaction(ostId);
+                            break;
+                    }
+                    Log.d(TAG, "transaction response: " + response);
+                    logTransaction(response);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    Utils.showToastAndLog(BookActivity.this, "Some error occured", TAG);
+                }
+            }
+        }).start();
+    }
+
     @OnClick(R.id.btn_review)
     public void onSendReviewClick(View v) {
         String txtReview = inputReview.getText().toString();
@@ -112,26 +149,37 @@ public class BookActivity extends AppCompatActivity {
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                     Utils.showToastAndLog(BookActivity.this,
                             "review pushed" + databaseReference.getKey(), TAG);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                JsonObject response = economy.executeReviewTransaction(user.getOstId());
-                                Log.d(TAG, "review transaction response: " + response);
-                                logTransaction(response);
-                            } catch (IOException e) {
-                                Log.e(TAG, e.getMessage(), e);
-                            } catch (Exception e) {
-                                Log.e(TAG, e.getMessage(), e);
-                            }
-                        }
-                    }).start();
-
+                    executeTransaction(RewardCultureEconomy.ActionType.REVIEW, user.getOstId());
                 }
             });
             // reset state of input review
             inputReview.getText().clear();
         }
+    }
+
+    @OnClick(R.id.btn_buy)
+    public void onBuyClick(View v) {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Let's buy this!!");
+        dialogBuilder.setMessage(String.format(
+                "This will transfer %d bbtc tokens from your wallet to the seller.", 10));
+        dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                executeTransaction(RewardCultureEconomy.ActionType.BUY, user.getOstId());
+            }
+        });
+        dialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
+    }
+
+    @OnClick(R.id.btn_share)
+    public void onShareClick(View v) {
+
     }
 
     void updateUI() {
@@ -167,20 +215,7 @@ public class BookActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final User reviewer = dataSnapshot.getValue(User.class);
                 if (reviewer == null) return;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            JsonObject response = economy.executeLikeTransaction(reviewer.getOstId());
-                            Log.d(TAG, "like transaction response: " + response);
-                            logTransaction(response);
-                        } catch (IOException e) {
-                            Log.e(TAG, e.getMessage(), e);
-                        } catch (Exception e) {
-                            Log.e(TAG, e.getMessage(), e);
-                        }
-                    }
-                }).start();
+                executeTransaction(RewardCultureEconomy.ActionType.LIKE, reviewer.getOstId());
             }
 
             @Override
@@ -195,6 +230,9 @@ public class BookActivity extends AppCompatActivity {
         dbHelper.logTransaction(t);
     }
 
+    /**
+     * Adapter for reviews list.
+     */
     class ReviewsListAdapter extends FirebaseListAdapter<Review> {
 
         public ReviewsListAdapter(@NonNull FirebaseListOptions<Review> options) {

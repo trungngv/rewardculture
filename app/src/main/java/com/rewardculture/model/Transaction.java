@@ -28,7 +28,10 @@ public class Transaction {
         t.setToUuid(obj.get(TO_UUID).getAsString());
         t.setActionId(obj.get(ACTION_ID).getAsString());
         t.setTransactionTime(obj.get(TIMESTAMP).getAsLong());
-        t.setAmount(obj.get(AMOUNT).getAsFloat());
+        // amount is null when obj is a response from a fixed amount transaction action
+        if (!obj.get(AMOUNT).isJsonNull()) {
+            t.setAmount(obj.get(AMOUNT).getAsFloat());
+        }
 
         return t;
     }
