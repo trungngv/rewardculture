@@ -35,6 +35,13 @@ public class RewardCultureEconomy {
             this.actionId = actionId;
         }
 
+        public static String getActionName(String actionId) {
+            if (actionId.equals(REVIEW.actionId)) return "Review reward";
+            if (actionId.equals(LIKE.actionId)) return "Like reward";
+            if (actionId.equals(BUY.actionId)) return "Transfer";
+            return "Unknown";
+        }
+
         @Override
         public String toString() {
             return actionId;
@@ -49,7 +56,7 @@ public class RewardCultureEconomy {
      * Creates a user in the economy.
      *
      * @param username
-     * @return a JsonObject containing "available_balance", "airdropped_balance", and "token_balance"
+     * @return
      * @throws IOException
      */
     public JsonObject createUser(String username) throws IOException {
@@ -62,12 +69,19 @@ public class RewardCultureEconomy {
         return ost.createUser(username);
     }
 
+    /**
+     * Returns user balances.
+     *
+     * @param userId
+     * @return a JsonObject containing "available_balance", "airdropped_balance", and "token_balance"
+     * @throws IOException
+     */
     public JsonObject getUserBalances(String userId) throws IOException {
         try {
             JsonObject response = ost.getUserBalance(userId);
             return response.getAsJsonObject("data").getAsJsonObject("balance");
         } catch (OSTAPIService.MissingParameter e) {
-
+            e.printStackTrace();
         }
 
         return null;
@@ -152,11 +166,12 @@ public class RewardCultureEconomy {
     public static void main(String args[]) throws IOException {
         RewardCultureEconomy economy = new RewardCultureEconomy();
         String aliceId = "6a791a28-f156-49dd-a751-263a053fca25";
+        String trungId = "46c30717-cc8c-45b8-b10b-6e51a6ddc08e";
         //JsonObject response = economy.createUser("bluesky101");
         //System.out.println(economy.parseUserResponse(response));
         //JsonObject response = economy.executeReviewTransaction(aliceId);
         //System.out.println(response);
-        //System.out.println(economy.getUserBalances(aliceId));
+        System.out.println(economy.getUserBalances(trungId));
         //System.out.println(economy.getTransactions(aliceId));
 
     }

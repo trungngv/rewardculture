@@ -46,7 +46,7 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
     User user;
     ProgressDialog progressDialog;
     RewardCultureEconomy economy = new RewardCultureEconomy();
-    SimpleDateFormat formatter = new SimpleDateFormat("d MMM yyyy HH:mm:ss");
+    SimpleDateFormat formatter = new SimpleDateFormat("d MMM yyyy, HH:mm:ss");
 
     public WalletFragment() {
         // Required empty public constructor
@@ -107,6 +107,23 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
             return formatter.format(new Date(timestamp));
         }
 
+        /**
+         * Constructs transaction description.
+         *
+         * @param actionId
+         * @param entity
+         * @param isSender true if the current user is the sender, false if he's a recipient
+         * @return
+         */
+        String getTransactionDescription(String actionId, String entity, boolean isSender) {
+            String action = RewardCultureEconomy.ActionType.getActionName(actionId);
+            if (isSender) {
+                return String.format("%s to %s", action, entity);
+            }
+
+            return String.format("%s from %s", action, entity);
+        }
+
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -118,7 +135,9 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
                 view = convertView;
             }
             Transaction transaction = getItem(position);
-
+            // from or to can be company or other user
+            // if from id = '' =>
+            // if entity ==
             ((TextView) view.findViewById(R.id.txt_date)).setText(
                     formatDateTime(transaction.getTransactionTime()));
             // entity is the other party in the transaction
@@ -127,14 +146,24 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
             String amount;
             String fromId = transaction.getFromUuid();
             String toId = transaction.getToUuid();
+            boolean isSender;
             if (fromId.equals(user.getOstId())) {
                 entity = toId;
                 amount = "-" + String.format("$%.4f", transaction.getAmount());
+                isSender = true;
             } else {
                 entity = fromId;
                 amount = "+" + String.format("$%.4f", transaction.getAmount());
+                isSender = false;
             }
-            ((TextView) view.findViewById(R.id.txt_entity)).setText(entity);
+            // show entity as name instead of hexa dec for demo purposes
+            if (entity.equals(economy.getCompanyOstId())) {
+                entity = "RC Ltd";
+            } else if (entity.equals("a871e4e2-7469-4b83-a96c-e00521d1cc1f")) {
+                entity = "Freeman Diamondsworthy";
+            }
+            ((TextView) view.findViewById(R.id.txt_entity)).setText(
+                    getTransactionDescription(transaction.getActionId(), entity, isSender));
             TextView amountView = view.findViewById(R.id.txt_amount);
             amountView.setText(amount);
             if (amount.startsWith("+")) {
@@ -149,13 +178,12 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
     /**
      * Async task runner to get and display available balance.
      */
-    private final class BalanceRetrievalTask extends AsyncTask<String, String, Float> {
+    private final class BalanceRetrievalTask extends AsyncTask<String, String, JsonObject> {
 
         @Override
-        protected Float doInBackground(String... params) {
+        protected JsonObject doInBackground(String... params) {
             try {
-                float balance = economy.getAvailableBalance(params[0]);
-                return balance;
+                return economy.getUserBalances(params[0]);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -163,12 +191,15 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
         }
 
         @Override
-        protected void onPostExecute(Float balance) {
-            if (balance == null) {
-                balance = 0.0f;
+        protected void onPostExecute(JsonObject balances) {
+            if (balances != null) {
+                ((TextView) getView().findViewById(R.id.txt_total_balance)).setText(
+                        String.format("$%.2f", balances.get("available_balance").getAsFloat()));
+                ((TextView) getView().findViewById(R.id.txt_balance)).setText(
+                        String.format("$%.2f Other", balances.get("token_balance").getAsFloat()));
+                ((TextView) getView().findViewById(R.id.txt_airdrop)).setText(
+                        String.format("$%.2f Airdropped", balances.get("airdropped_balance").getAsFloat()));
             }
-            ((TextView) getView().findViewById(R.id.txt_balance)).setText(
-                    String.format("$%.2f Available", balance));
         }
     }
 
