@@ -35,6 +35,13 @@
                 android:text="by Trung Nguyen (published 2018)"
                 app:layout_constraintTop_toBottomOf="@id/book_title" />
 
+            <TextView
+                android:id="@+id/book_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Price: $10 RC"
+                app:layout_constraintTop_toBottomOf="@id/book_author_year" />
+
             <Button
                 android:id="@+id/btn_buy"
                 android:layout_width="108dp"
@@ -44,7 +51,7 @@
                 android:text="@string/buy"
                 app:layout_constraintEnd_toStartOf="@+id/btn_share"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/book_author_year" />
+                app:layout_constraintTop_toBottomOf="@id/book_price" />
 
             <Button
                 android:id="@+id/btn_share"
@@ -53,7 +60,7 @@
                 android:drawableStart="@drawable/ic_share"
                 android:text="@string/share"
                 app:layout_constraintStart_toEndOf="@+id/btn_buy"
-                app:layout_constraintTop_toBottomOf="@id/book_author_year" />
+                app:layout_constraintTop_toBottomOf="@id/book_price" />
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
 

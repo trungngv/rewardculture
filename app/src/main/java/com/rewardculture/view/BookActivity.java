@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +37,8 @@ import com.rewardculture.model.Review;
 import com.rewardculture.model.Transaction;
 import com.rewardculture.model.User;
 import com.rewardculture.ost.RewardCultureEconomy;
+
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -105,8 +108,9 @@ public class BookActivity extends AppCompatActivity {
 
     /**
      * Helper method to execute a transaction in a new thread.
-     *
+     * <p>
      * TODO use async task to update status if I have enough time
+     *
      * @param action
      * @param ostId
      */
@@ -126,10 +130,17 @@ public class BookActivity extends AppCompatActivity {
                         case BUY:
                             response = economy.executeBuyTransaction(ostId);
                             break;
+                        case GIFT:
+                            // Another cheat: will transfer 5 bbtc to FD only
+                            response = economy.executeGiftTransaction(ostId,
+                                    RewardCultureEconomy.FD_ID, 5.0f);
+                            break;
                     }
-                    Log.d(TAG, "transaction response: " + response);
-                    logTransaction(response);
-                } catch (Exception e) {
+                    if (response != null) {
+                        Log.d(TAG, "transaction response: " + response);
+                        logTransaction(response);
+                    }
+                } catch (IOException e) {
                     Log.e(TAG, e.getMessage(), e);
                     Utils.showToastAndLog(BookActivity.this, "Some error occured", TAG);
                 }
@@ -162,7 +173,7 @@ public class BookActivity extends AppCompatActivity {
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Let's buy this!!");
         dialogBuilder.setMessage(String.format(
-                "This will transfer %d bbtc tokens from your wallet to the seller.", 10));
+                "This will transfer $%d RC from your wallet to the seller.", 10));
         dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 executeTransaction(RewardCultureEconomy.ActionType.BUY, user.getOstId());
@@ -179,7 +190,27 @@ public class BookActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_share)
     public void onShareClick(View v) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.share_dialog, null);
+        dialogBuilder.setView(dialogView);
 
+        dialogBuilder.setTitle("Share as a gift");
+        dialogBuilder.setMessage("Enter the recipient's email address in the box below. And why not send them some tokens as a gift as well?");
+        dialogBuilder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // I'm cheating here and will only execute gift from this user to Freeman Diamondsworthy
+                // so that I don't have to pass reviewer id.
+                executeTransaction(RewardCultureEconomy.ActionType.GIFT, user.getOstId());
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
     }
 
     void updateUI() {

@@ -6,10 +6,16 @@ android:layout_height="match_parent"
 android:padding="10dp"
 android:orientation="vertical">
 
-<EditText
-    android:id="@+id/edit1"
+<android.support.design.widget.TextInputEditText
+    android:id="@+id/recipient_email"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:inputType="text" />
-
+    android:inputType="textEmailAddress"
+    android:hint="Email address"/>
+<android.support.design.widget.TextInputEditText
+    android:id="@+id/gift_amount"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:inputType="number"
+    android:hint="Token amount to gift (in RC)"/>
 </LinearLayout>

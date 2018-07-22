@@ -116,6 +116,15 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
          * @return
          */
         String getTransactionDescription(String actionId, String entity, boolean isSender) {
+            // show entity as name instead of hexa dec for demo purposes
+            if (entity.equals(economy.getCompanyOstId())) {
+                entity = "RC Ltd";
+            } else if (entity.equals(RewardCultureEconomy.FD_ID)) {
+                entity = "Freeman Diamondsworthy";
+            } else if (entity.equals(RewardCultureEconomy.TN_ID)) {
+                entity = "Trung Nguyen";
+            }
+
             String action = RewardCultureEconomy.ActionType.getActionName(actionId);
             if (isSender) {
                 return String.format("%s to %s", action, entity);
@@ -135,9 +144,6 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
                 view = convertView;
             }
             Transaction transaction = getItem(position);
-            // from or to can be company or other user
-            // if from id = '' =>
-            // if entity ==
             ((TextView) view.findViewById(R.id.txt_date)).setText(
                     formatDateTime(transaction.getTransactionTime()));
             // entity is the other party in the transaction
@@ -149,18 +155,12 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
             boolean isSender;
             if (fromId.equals(user.getOstId())) {
                 entity = toId;
-                amount = "-" + String.format("$%.4f", transaction.getAmount());
+                amount = "-" + String.format("$%.2f", transaction.getAmount());
                 isSender = true;
             } else {
                 entity = fromId;
-                amount = "+" + String.format("$%.4f", transaction.getAmount());
+                amount = "+" + String.format("$%.2f", transaction.getAmount());
                 isSender = false;
-            }
-            // show entity as name instead of hexa dec for demo purposes
-            if (entity.equals(economy.getCompanyOstId())) {
-                entity = "RC Ltd";
-            } else if (entity.equals("a871e4e2-7469-4b83-a96c-e00521d1cc1f")) {
-                entity = "Freeman Diamondsworthy";
             }
             ((TextView) view.findViewById(R.id.txt_entity)).setText(
                     getTransactionDescription(transaction.getActionId(), entity, isSender));
@@ -194,7 +194,7 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
         protected void onPostExecute(JsonObject balances) {
             if (balances != null) {
                 ((TextView) getView().findViewById(R.id.txt_total_balance)).setText(
-                        String.format("$%.2f", balances.get("available_balance").getAsFloat()));
+                        String.format("$%.2f RC", balances.get("available_balance").getAsFloat()));
                 ((TextView) getView().findViewById(R.id.txt_balance)).setText(
                         String.format("$%.2f Other", balances.get("token_balance").getAsFloat()));
                 ((TextView) getView().findViewById(R.id.txt_airdrop)).setText(
