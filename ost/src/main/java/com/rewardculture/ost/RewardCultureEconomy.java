@@ -20,6 +20,11 @@ public class RewardCultureEconomy {
     private static final String COMPANY_UUID = "6f7d0e3f-fa62-4a51-bd14-b125b6d5e261";
 
     private static final OstSdk ost = OstSdk.getInstance();
+    /**
+     * OST ID of Freeman Diamondsworthy.
+     */
+    public static final String FD_ID = "a871e4e2-7469-4b83-a96c-e00521d1cc1f";
+    public static final String TN_ID = "46c30717-cc8c-45b8-b10b-6e51a6ddc08e";
 
     /**
      * The actions in this economy.
