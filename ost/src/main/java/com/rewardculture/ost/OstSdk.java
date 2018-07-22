@@ -112,7 +112,7 @@ public class OstSdk {
     }
 
     /**
-     * Execute transaction with fixed amount when action is first created.
+     * Execute transaction with fixed amount that was set when action was first created.
      * @param fromOstId
      * @param toOstId
      * @param actionId
@@ -121,11 +121,30 @@ public class OstSdk {
      */
     public JsonObject executeTransaction(String fromOstId, String toOstId, String actionId)
             throws IOException {
+        return executeTransactionArbitraryAmount(fromOstId, toOstId, actionId, 0);
+    }
+
+    /**
+     * Execute transaction with arbitrary amount.
+     *
+     * @param fromOstId
+     * @param toOstId
+     * @param actionId
+     * @param amount if amount is 0.0 then transaction with fixed amount will be called
+     * @return
+     * @throws IOException
+     */
+    public JsonObject executeTransactionArbitraryAmount(
+            String fromOstId, String toOstId, String actionId, float amount)
+            throws IOException {
         Transactions transactions = services.transactions;
         Map<String, Object> params = new HashMap<>();
         params.put("from_user_id", fromOstId);
         params.put("to_user_id", toOstId);
         params.put("action_id", actionId);
+        if (amount > 0) {
+            params.put("amount", amount);
+        }
         JsonObject response = transactions.execute(params);
 
         return response;

@@ -27,7 +27,8 @@ public class RewardCultureEconomy {
     public enum ActionType {
         REVIEW("29914"),
         LIKE("29913"),
-        BUY("39174");
+        BUY("39174"),
+        GIFT("39186");
 
         final String actionId;
 
@@ -39,6 +40,7 @@ public class RewardCultureEconomy {
             if (actionId.equals(REVIEW.actionId)) return "Review reward";
             if (actionId.equals(LIKE.actionId)) return "Like reward";
             if (actionId.equals(BUY.actionId)) return "Transfer";
+            if (actionId.equals(GIFT.actionId)) return "Gift";
             return "Unknown";
         }
 
@@ -133,6 +135,14 @@ public class RewardCultureEconomy {
         return parseTransactionResponse(response);
     }
 
+    public JsonObject executeGiftTransaction(String senderId, String recipientId, float amount)
+            throws IOException {
+        JsonObject response = ost.executeTransactionArbitraryAmount(senderId, recipientId,
+                ActionType.GIFT.actionId, amount);
+
+        return parseTransactionResponse(response);
+    }
+
     /**
      * Parse transaction response.
      *
@@ -167,12 +177,13 @@ public class RewardCultureEconomy {
         RewardCultureEconomy economy = new RewardCultureEconomy();
         String aliceId = "6a791a28-f156-49dd-a751-263a053fca25";
         String trungId = "46c30717-cc8c-45b8-b10b-6e51a6ddc08e";
+        String freemanId = "a871e4e2-7469-4b83-a96c-e00521d1cc1f";
         //JsonObject response = economy.createUser("bluesky101");
         //System.out.println(economy.parseUserResponse(response));
         //JsonObject response = economy.executeReviewTransaction(aliceId);
         //System.out.println(response);
-        System.out.println(economy.getUserBalances(trungId));
+        //System.out.println(economy.getUserBalances(trungId));
         //System.out.println(economy.getTransactions(aliceId));
-
+        System.out.println(economy.executeGiftTransaction(trungId, freemanId, 30));
     }
 }
