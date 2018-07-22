@@ -36,6 +36,8 @@ import java.util.List;
  * <p>
  * Use the {@link WalletFragment#newInstance} factory method to
  * create an instance of this fragment.
+ *
+ * TODO show airdropped and token (if time allows)
  */
 public class WalletFragment extends android.support.v4.app.ListFragment {
     private static final String ARG_USER = "user";
@@ -138,7 +140,7 @@ public class WalletFragment extends android.support.v4.app.ListFragment {
             if (amount.startsWith("+")) {
                 amountView.setTextColor(getResources().getColor(android.R.color.holo_green_light));
             } else {
-                amountView.setTextColor(getResources().getColor(android.R.color.holo_orange_light));
+                amountView.setTextColor(getResources().getColor(android.R.color.holo_red_light));
             }
             return view;
         }

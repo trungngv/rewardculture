@@ -22,8 +22,12 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.util.ExtraConstants;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,6 +46,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.google.firebase.auth.UserProfileChangeRequest.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final String TAG = "MainActivity";
@@ -91,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             .build(),
                     RC_SIGN_IN);
         } else {
+            //hackSetDisplayName(firebaseUser);
             Utils.showToastAndLog(this, "signed in user: " + firebaseUser.getDisplayName(), TAG);
             generateOstId(firebaseUser);
             //IdpResponse response = getIntent().getParcelableExtra(ExtraConstants.IDP_RESPONSE);
@@ -123,6 +130,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     RC_SIGN_IN);
         }
 
+    }
+
+    // only for setting username that was created manually
+    void hackSetDisplayName(FirebaseUser user) {
+        if (user == null) return;
+        if ("lingpdev@gmail.com".equals(user.getEmail()) && user.getDisplayName().isEmpty()) {
+            UserProfileChangeRequest profileUpdates = new Builder().setDisplayName
+                    ("Freeman Diamondsworthy").build();
+            user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "User profile updated.");
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -255,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     /**
      * Switching between fragments.
+     *
      * @param fragmentId
      */
     private void showFragment(int fragmentId) {

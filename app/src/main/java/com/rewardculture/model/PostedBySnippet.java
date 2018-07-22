@@ -18,7 +18,9 @@ public class PostedBySnippet {
     public PostedBySnippet(String id, String name, Uri photoUrl) {
         this.id = id;
         this.name = name;
-        this.photoUrl = photoUrl.toString();
+        if (photoUrl != null) {
+            this.photoUrl = photoUrl.toString();
+        }
     }
 
     public String getId() {
